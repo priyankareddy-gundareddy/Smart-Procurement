@@ -36,7 +36,13 @@ document.querySelectorAll('[data-detail="notifications-detail"]').forEach((link)
 	}
 });
 
-const dashboardViewIds = ['farmer-dashboard', 'dashboard-centers', 'token-detail', 'status-detail', 'notifications-detail'];
+const dashboardViewIds = ['farmer-dashboard', 'dashboard-centers', 'token-detail', 'status-detail', 'notifications-detail', 'profile-detail'];
+const notificationState = [
+	{ icon: '🔵', type: 'Booking', title: 'Slot Confirmed', message: 'Your procurement slot has been confirmed.', date: '10 September 2026 · 10:00 AM', unread: true },
+	{ icon: '🟢', type: 'Center Availability', title: 'Center Available', message: 'Vijayawada Procurement Center currently has 15 available slots.', date: 'Today · 9:15 AM', unread: true },
+	{ icon: '🟡', type: 'Reminder', title: 'Procurement Reminder', message: 'Your procurement appointment is tomorrow at 10:00 AM.', date: '9 September 2026 · 8:00 AM', unread: true },
+	{ icon: '✓', type: 'Procurement', title: 'Procurement Completed', message: 'Your Rice procurement has been completed successfully.', date: '8 September 2026 · 4:30 PM', unread: false }
+];
 const procurementCenters = [
 	{ name: 'Vijayawada Procurement Center', distance: 2.4, status: 'open', statusLabel: 'Open', waiting: 'low', waitingLabel: 'Low', waitDuration: '20 min', slots: 24, hours: '9:00 AM – 5:00 PM' },
 	{ name: 'Gannavaram Procurement Center', distance: 5.1, status: 'almost', statusLabel: 'Almost Full', waiting: 'medium', waitingLabel: 'Medium', waitDuration: '45 min', slots: 8, hours: '8:30 AM – 4:30 PM' },
@@ -125,9 +131,10 @@ function renderDashboardView(viewId) {
 	dashboard.classList.toggle('dashboard-subview-active', viewId !== 'farmer-dashboard');
 	const views = {
 		'dashboard-centers': ['Nearby Centers', 'Centers near your registered location, Gannavaram.', `<div class="dashboard-data-grid dashboard-center-grid">${procurementCenters.map((center) => `<article><span class="dashboard-data-icon">${center.distance.toFixed(1)} km away · ${center.statusLabel}</span><h3>${center.name}</h3><p>Waiting time: <strong>${center.waitDuration} · ${center.waitingLabel}</strong></p><strong>${center.slots} available slots</strong><button class="button button-primary dashboard-demo-button" type="button" ${center.status === 'closed' ? 'disabled' : ''}>Book Slot</button></article>`).join('')}</div>`],
-		'token-detail': ['My Bookings', 'View your upcoming and previous slot bookings.', '<div class="dashboard-info-card"><span class="dashboard-data-icon">Booking</span><h3>Upcoming booking</h3><p>Vijayawada Procurement Center · Rice · 500 kg</p><div class="dashboard-info-row"><span>Today, 10:00 AM – 11:00 AM</span><strong>Token P-1024</strong></div><button class="button button-primary dashboard-demo-button" type="button">Manage Booking</button></div>'],
-		'status-detail': ['My Procurement', 'Track your procurement history and completed transactions.', '<div class="dashboard-info-card"><span class="dashboard-data-icon">Procurement</span><h3>Rice procurement request</h3><p>Vijayawada Procurement Center · 500 kg</p><div class="dashboard-info-row"><span>Request submitted</span><strong>In progress</strong></div><button class="button button-dark dashboard-demo-button" type="button">View Details</button></div>'],
-		'notifications-detail': ['Notifications', 'Check important updates about your bookings and procurement.', '<div class="dashboard-notification-list"><article><span>New</span><div><strong>Your slot has been confirmed.</strong><small>Today, 9:15 AM</small></div></article><article><span>Info</span><div><strong>Your procurement center has 15 available slots.</strong><small>Yesterday</small></div></article><article><span>Update</span><div><strong>Center operating hours have changed.</strong><small>12 September 2026</small></div></article></div>']
+		'token-detail': ['My Bookings', 'View your upcoming and previous slot bookings.', getAllBookingsMarkup()],
+		'status-detail': ['Procurement Status', 'Track the procurement status of all your bookings', getAllProcurementStatusMarkup()],
+		'notifications-detail': ['Notifications', 'Stay updated about your procurement activities.', getNotificationsMarkup()],
+		'profile-detail': ['Your Profile', 'Manage the details connected to your signed-in farmer account.', getProfileMarkup()]
 	};
 	if (viewId === 'farmer-dashboard') {
 		panel.innerHTML = '';
@@ -141,11 +148,159 @@ function renderDashboardView(viewId) {
 	const view = views[viewId];
 	if (!view) return;
 	panel.innerHTML = `<span class="section-kicker">Farmer dashboard</span><h2>${view[0]}</h2><p class="dashboard-subview-lede">${view[1]}</p>${view[2]}`;
+	if (viewId === 'notifications-detail') setupNotifications(panel);
 	panel.querySelectorAll('.dashboard-demo-button').forEach((button) => button.addEventListener('click', () => {
 		toast.textContent = 'This is demo data. This action will connect to the backend later.';
 		toast.classList.add('show');
 		window.setTimeout(() => toast.classList.remove('show'), 3200);
 	}));
+}
+
+function getCurrentFarmer() {
+	try {
+		return JSON.parse(sessionStorage.getItem('smartProcureCurrentFarmer') || 'null');
+	} catch (error) {
+		return null;
+	}
+}
+
+function getLatestBooking() {
+	try {
+		return JSON.parse(localStorage.getItem('smartProcureLatestBooking') || 'null');
+	} catch (error) {
+		return null;
+	}
+}
+
+function getStatusBookings() {
+	const storedBookings = (() => {
+		try {
+			const bookings = JSON.parse(localStorage.getItem('smartProcureBookings') || '[]');
+			return Array.isArray(bookings) ? bookings : [];
+		} catch (error) {
+			return [];
+		}
+	})();
+	const latestBooking = getLatestBooking();
+	const bookings = latestBooking && !storedBookings.some((booking) => booking.token === latestBooking.token)
+		? [latestBooking, ...storedBookings]
+		: storedBookings;
+	const currentFarmer = getCurrentFarmer();
+	const currentMobile = normalizeMobile(currentFarmer?.mobile);
+	const taggedBookings = bookings.filter((booking) => booking.farmerMobile);
+	if (!currentMobile || !taggedBookings.length) return bookings;
+	return bookings.filter((booking) => !booking.farmerMobile || normalizeMobile(booking.farmerMobile) === currentMobile);
+}
+
+function formatStatusDate(dateString) {
+	if (!dateString) return '10 September 2026';
+	const date = new Date(`${dateString}T00:00:00`);
+	return Number.isNaN(date.getTime()) ? dateString : new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+}
+
+function formatStatusTime(time) {
+	if (!time) return '10:00 AM – 11:00 AM';
+	const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+	if (!match) return time;
+	let hour = Number(match[1]);
+	const period = match[3].toUpperCase();
+	hour = hour === 12 ? 1 : hour + 1;
+	return `${time} – ${String(hour).padStart(2, '0')}:${match[2]} ${period}`;
+}
+
+function getProcurementStatusMarkup() {
+	const booking = getLatestBooking() || {};
+	const details = {
+		token: booking.token || 'SP-1024',
+		crop: booking.crop || 'Paddy',
+		quantity: booking.quantity ? `${booking.quantity} kg` : '500 kg',
+		center: booking.center || 'Vijayawada Procurement Center',
+		date: formatStatusDate(booking.date),
+		time: formatStatusTime(booking.time)
+	};
+	return `<div class="procurement-status-page"><div class="procurement-details-card"><div class="procurement-detail"><small>Booking / Token</small><strong>${details.token}</strong></div><div class="procurement-detail"><small>Crop</small><strong>${details.crop}</strong></div><div class="procurement-detail"><small>Quantity</small><strong>${details.quantity}</strong></div><div class="procurement-detail"><small>Procurement Center</small><strong>${details.center}</strong></div><div class="procurement-detail"><small>Booking Date</small><strong>${details.date}</strong></div><div class="procurement-detail"><small>Slot Time</small><strong>${details.time}</strong></div></div><div class="procurement-timeline" aria-label="Procurement status timeline"><div class="status-timeline-step complete"><span>✓</span><div><strong>Request Submitted</strong><small>Completed</small></div></div><div class="status-timeline-step complete"><span>✓</span><div><strong>Slot Confirmed</strong><small>Completed</small></div></div><div class="status-timeline-step current"><span>●</span><div><strong>Waiting for Procurement</strong><small>Current status</small></div></div><div class="status-timeline-step pending"><span>○</span><div><strong>Procurement Completed</strong><small>Pending</small></div></div></div><button class="button button-dark dashboard-action procurement-back-button" type="button" data-dashboard-action="back-dashboard">Back to Dashboard</button></div>`;
+}
+
+function getAllProcurementStatusMarkup() {
+	const bookings = getStatusBookings();
+	if (!bookings.length) return '<div class="empty-status-board"><strong>No procurement bookings yet.</strong><span>Confirmed bookings will appear here.</span></div>';
+	return `<div class="procurement-status-board">${bookings.map((booking) => getProcurementStatusCardMarkup(booking)).join('')}</div>`;
+}
+
+function getAllBookingsMarkup() {
+	const bookings = getStatusBookings();
+	if (!bookings.length) return '<div class="empty-status-board"><strong>No bookings yet.</strong><span>Your confirmed procurement slots will appear here.</span></div>';
+	return `<div class="dashboard-booking-board">${bookings.map((booking, index) => `<article class="dashboard-booking-card"><div class="dashboard-booking-card-top"><span class="dashboard-data-icon">Booking ${index + 1}</span><span class="booking-status">${booking.status || 'Confirmed'}</span></div><h3>${booking.token || `SP-${index + 1}`}</h3><p>${booking.center || 'Selected Center'}</p><div class="dashboard-booking-meta"><span><small>Crop</small><strong>${booking.crop || 'Rice'}</strong></span><span><small>Quantity</small><strong>${booking.quantity ? `${booking.quantity} kg` : '500 kg'}</strong></span><span><small>Date</small><strong>${formatStatusDate(booking.date)}</strong></span><span><small>Time</small><strong>${formatStatusTime(booking.time)}</strong></span></div></article>`).join('')}</div>`;
+}
+
+function getProcurementStatusCardMarkup(booking) {
+	const details = {
+		token: booking.token || 'SP-1024',
+		crop: booking.crop || 'Paddy',
+		quantity: booking.quantity ? `${booking.quantity} kg` : '500 kg',
+		center: booking.center || 'Vijayawada Procurement Center',
+		date: formatStatusDate(booking.date),
+		time: formatStatusTime(booking.time)
+	};
+	return `<article class="procurement-status-card"><div class="procurement-details-card"><div class="procurement-detail"><small>Booking / Token</small><strong>${details.token}</strong></div><div class="procurement-detail"><small>Crop</small><strong>${details.crop}</strong></div><div class="procurement-detail"><small>Quantity</small><strong>${details.quantity}</strong></div><div class="procurement-detail"><small>Procurement Center</small><strong>${details.center}</strong></div><div class="procurement-detail"><small>Booking Date</small><strong>${details.date}</strong></div><div class="procurement-detail"><small>Slot Time</small><strong>${details.time}</strong></div></div><div class="procurement-timeline" aria-label="Procurement status timeline"><div class="status-timeline-step complete"><span>✓</span><div><strong>Request Submitted</strong><small>Completed</small></div></div><div class="status-timeline-step complete"><span>✓</span><div><strong>Slot Confirmed</strong><small>Completed</small></div></div><div class="status-timeline-step current"><span>●</span><div><strong>Waiting for Procurement</strong><small>Current status</small></div></div><div class="status-timeline-step pending"><span>○</span><div><strong>Procurement Completed</strong><small>Pending</small></div></div></div></article>`;
+}
+
+function getFarmerInitials(farmer) {
+	return String(farmer?.fullName || '').trim().split(/\s+/).filter(Boolean).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function updateDashboardProfileBadge(farmer) {
+	const profileButton = document.querySelector('.dashboard-profile-button');
+	if (profileButton) profileButton.querySelector('.profile-button-avatar')?.replaceChildren();
+}
+
+function getProfileMarkup() {
+	const farmer = getCurrentFarmer() || {};
+	const name = farmer.fullName || 'Farmer';
+	const mobile = farmer.mobile || 'Not provided';
+	const state = farmer.state || 'Not provided';
+	const district = farmer.district || 'Not provided';
+	return `<div class="dashboard-profile-card"><div class="dashboard-profile-identity"><span class="profile-avatar-large">${getFarmerInitials(farmer)}</span><div><h3>${name}</h3><p>Signed-in farmer account</p></div></div><dl><div><dt>Mobile Number</dt><dd>${mobile}</dd></div><div><dt>State</dt><dd>${state}</dd></div><div><dt>District</dt><dd>${district}</dd></div></dl></div>`;
+}
+
+function getNotificationsMarkup() {
+	const unreadCount = notificationState.filter((notification) => notification.unread).length;
+	return `<div class="notifications-toolbar"><span class="notification-count"><strong>${unreadCount}</strong> unread updates</span><div><button class="button button-primary notification-mark-all" type="button">Mark All as Read</button><button class="button button-outline notification-clear-all" type="button">Clear All</button></div></div><div class="notification-board">${notificationState.map((notification, index) => `<article class="notification-card${notification.unread ? ' unread' : ''}" data-notification-index="${index}" tabindex="0"><span class="notification-card-icon" aria-hidden="true">${notification.icon}</span><div class="notification-card-content"><div class="notification-card-heading"><div><span class="notification-type">${notification.type}</span><h3>${notification.title}</h3></div><span class="notification-state">${notification.unread ? 'Unread' : 'Read'}</span></div><p>${notification.message}</p><small>${notification.date}</small></div></article>`).join('')}</div><button class="button button-dark notification-back-button dashboard-action" type="button" data-dashboard-action="back-dashboard">Back to Dashboard</button>`;
+}
+
+function updateNotificationBell() {
+	const unreadCount = notificationState.filter((notification) => notification.unread).length;
+	const bell = document.querySelector('.dashboard-bell');
+	if (!bell) return;
+	bell.innerHTML = `🔔<i${unreadCount === 0 ? ' hidden' : ''}>${unreadCount}</i>`;
+}
+
+function setupNotifications(panel) {
+	updateNotificationBell();
+	panel.querySelectorAll('.notification-card').forEach((card) => {
+		const markRead = () => {
+			const notification = notificationState[Number(card.dataset.notificationIndex)];
+			if (!notification?.unread) return;
+			notification.unread = false;
+			renderDashboardView('notifications-detail');
+		};
+		card.addEventListener('click', markRead);
+		card.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter' || event.key === ' ') {
+				event.preventDefault();
+				markRead();
+			}
+		});
+	});
+	panel.querySelector('.notification-mark-all')?.addEventListener('click', () => {
+		notificationState.forEach((notification) => { notification.unread = false; });
+		renderDashboardView('notifications-detail');
+	});
+	panel.querySelector('.notification-clear-all')?.addEventListener('click', () => {
+		notificationState.length = 0;
+		renderDashboardView('notifications-detail');
+	});
+	panel.querySelector('.notification-back-button')?.addEventListener('click', () => showDetail('farmer-dashboard'));
 }
 
 function showDetail(detailId) {
@@ -253,24 +408,65 @@ document.querySelector('.center-booking-action')?.addEventListener('click', () =
 
 const loginForm = document.getElementById('login-form');
 function normalizeMobile(value) {
-	const digits = value.replace(/\D/g, '');
+	const digits = String(value || '').replace(/\D/g, '');
 	return digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits;
+}
+
+function getStoredAccounts() {
+	const accounts = [];
+	try {
+		const list = JSON.parse(localStorage.getItem('smartProcureAccounts') || '[]');
+		if (Array.isArray(list)) accounts.push(...list.filter(Boolean));
+	} catch (error) {
+		console.warn('Failed to parse stored accounts:', error);
+	}
+	try {
+		const legacyFarmer = JSON.parse(localStorage.getItem('smartProcureFarmer') || 'null');
+		if (legacyFarmer) accounts.push(legacyFarmer);
+	} catch (error) {
+		console.warn('Failed to parse legacy farmer profile:', error);
+	}
+	const uniqueAccounts = accounts.filter((account, index, all) => {
+		const mobile = normalizeMobile(account?.mobile);
+		return mobile && all.findIndex((candidate) => normalizeMobile(candidate?.mobile) === mobile && String(candidate?.password || '') === String(account?.password || '')) === index;
+	});
+	if (uniqueAccounts.length && localStorage.getItem('smartProcureAccounts') !== JSON.stringify(uniqueAccounts)) {
+		localStorage.setItem('smartProcureAccounts', JSON.stringify(uniqueAccounts));
+	}
+	return uniqueAccounts;
+}
+
+function saveStoredAccounts(accounts) {
+	const uniqueAccounts = accounts.filter((account, index, all) => {
+		const mobile = normalizeMobile(account?.mobile);
+		return mobile && all.findIndex((candidate) => normalizeMobile(candidate?.mobile) === mobile) === index;
+	});
+	localStorage.setItem('smartProcureAccounts', JSON.stringify(uniqueAccounts));
+	const lastAccount = uniqueAccounts[uniqueAccounts.length - 1];
+	if (lastAccount) localStorage.setItem('smartProcureFarmer', JSON.stringify(lastAccount));
+}
+
+function findMatchingAccount(mobile, password) {
+	const accounts = getStoredAccounts();
+	return accounts.find((account) => normalizeMobile(account.mobile) === mobile && String(account.password) === String(password)) || null;
 }
 
 if (loginForm) {
 	loginForm.addEventListener('submit', (event) => {
 		event.preventDefault();
-		const farmer = JSON.parse(localStorage.getItem('smartProcureFarmer') || 'null');
 		const mobile = normalizeMobile(loginForm.querySelector('#mobile').value);
 		const password = loginForm.querySelector('#password').value;
-		if (farmer && normalizeMobile(farmer.mobile) === mobile && farmer.password === password) {
+		const farmer = findMatchingAccount(mobile, password);
+		if (farmer) {
 			sessionStorage.setItem('smartProcureLoggedIn', 'true');
+			sessionStorage.setItem('smartProcureCurrentFarmer', JSON.stringify(farmer));
+			updateDashboardProfileBadge(farmer);
 			toast.textContent = 'Login successful. Welcome back, ' + farmer.fullName + '.';
 			showDetail('farmer-dashboard');
-		} else if (!farmer) {
-			toast.textContent = 'No demo account found. Please register first.';
+		} else if (!getStoredAccounts().length) {
+			toast.textContent = 'No account found. Please register first.';
 		} else {
-			toast.textContent = 'The mobile number or password does not match your demo account.';
+			toast.textContent = 'The mobile number or password does not match your account.';
 		}
 		toast.classList.add('show');
 		window.setTimeout(() => toast.classList.remove('show'), 3200);
@@ -324,8 +520,16 @@ if (registrationForm) {
 			success.textContent = '';
 			return;
 		}
-		values.mobile = normalizeMobile(values.mobile);
-		localStorage.setItem('smartProcureFarmer', JSON.stringify(values));
+		const normalizedMobile = normalizeMobile(values.mobile);
+		const storedAccounts = getStoredAccounts();
+		const hasExistingAccount = storedAccounts.some((account) => normalizeMobile(account.mobile) === normalizedMobile);
+		if (hasExistingAccount) {
+			success.textContent = 'This mobile number is already registered. Please login.';
+			return;
+		}
+		values.mobile = normalizedMobile;
+		const updatedAccounts = [...storedAccounts, values];
+		saveStoredAccounts(updatedAccounts);
 		success.textContent = 'Registration successful! You can now login.';
 		registrationForm.reset();
 		districtSelect.innerHTML = '<option value="">Select a state first</option>';
@@ -355,11 +559,32 @@ if (!initialDetail || initialDetail === 'home') {
 	window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'auto' }), 100);
 }
 
+const dashboardLogout = document.querySelector('.dashboard-logout');
+if (dashboardLogout && !document.querySelector('.dashboard-profile-button')) {
+	const currentFarmer = getCurrentFarmer();
+	const profileButton = document.createElement('button');
+	profileButton.className = 'dashboard-profile-button button button-dark';
+	profileButton.type = 'button';
+	profileButton.innerHTML = '<span class="profile-button-avatar" aria-hidden="true"><svg viewBox="0 0 40 40" role="presentation"><circle cx="20" cy="10" r="7" fill="#000"/><path d="M4 36c0-8.7 7.2-14 16-14s16 5.3 16 14c0 1.2-.8 2-2 2H6c-1.2 0-2-.8-2-2Z" fill="#000"/></svg></span>';
+	profileButton.setAttribute('aria-label', 'My Profile');
+	profileButton.title = 'My Profile';
+	profileButton.addEventListener('click', () => showDetail('profile-detail'));
+	dashboardLogout.before(profileButton);
+}
+
 document.querySelectorAll('.dashboard-action').forEach((button) => {
 	button.addEventListener('click', () => {
 		const destinations = { centers: 'dashboard-centers', bookings: 'token-detail', procurement: 'status-detail', notifications: 'notifications-detail' };
+		if (button.dataset.dashboardAction === 'book') {
+			window.location.href = 'booking.html';
+			return;
+		}
 		if (destinations[button.dataset.dashboardAction]) {
 			showDetail(destinations[button.dataset.dashboardAction]);
+			return;
+		}
+		if (button.dataset.dashboardAction === 'back-dashboard') {
+			showDetail('farmer-dashboard');
 			return;
 		}
 		toast.textContent = 'Demo slot selected. Your booking flow will continue here.';
@@ -368,7 +593,10 @@ document.querySelectorAll('.dashboard-action').forEach((button) => {
 	});
 });
 
-document.querySelector('.dashboard-logout')?.addEventListener('click', () => {
+dashboardLogout?.addEventListener('click', () => {
 	sessionStorage.removeItem('smartProcureLoggedIn');
+	sessionStorage.removeItem('smartProcureCurrentFarmer');
 	showDetail('login-detail');
 });
+
+updateNotificationBell();
