@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=admin-auth-1">
+  <link rel="stylesheet" href="style.css?v=admin-auth-3">
 </head>
 <body class="admin-login-body">
   <main class="admin-login-shell">
@@ -17,16 +17,17 @@
       <h1 id="admin-login-title">Admin Login</h1>
       <p class="admin-login-lede">Sign in to manage farmers, procurement requests, centers, and slots.</p>
       <form id="admin-login-form" novalidate>
-        <label for="admin-username">Email or Username</label>
-        <input id="admin-username" name="username" type="text" autocomplete="username" placeholder="Enter admin username" required>
+        <label for="admin-username">Admin Email</label>
+        <input id="admin-username" name="username" type="email" autocomplete="username" placeholder="Enter admin email" required>
         <label for="admin-password">Password</label>
         <input id="admin-password" name="password" type="password" autocomplete="current-password" placeholder="Enter admin password" required>
         <p class="admin-login-error" id="admin-login-error" role="alert" aria-live="polite"></p>
         <button class="admin-login-submit" type="submit">Login to Admin Dashboard <span>→</span></button>
       </form>
-      <a class="admin-login-back" href="index.html">← Back to SmartProcure</a>
+      <p class="admin-login-register">Don't have an account? <a href="admin-register.html">Register</a></p>
+      <a class="admin-login-back" href="index.html#login-selection">← Back to Login Selection</a>
     </section>
   </main>
-  <script src="admin-auth.js?v=admin-auth-1"></script>
+  <script src="admin-auth.js?v=admin-auth-3"></script>
 </body>
 </html>

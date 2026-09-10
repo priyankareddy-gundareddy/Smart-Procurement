@@ -31,6 +31,13 @@ let bookingSelection = {
   time: ''
 };
 
+const fallbackCenters = [
+  { name: 'Vijayawada Procurement Center', distanceKm: 2.4, status: 'open' },
+  { name: 'Guntur Procurement Center', distanceKm: 5.1, status: 'open' },
+  { name: 'Mangalagiri Procurement Center', distanceKm: 8.7, status: 'open' },
+  { name: 'Amaravati Procurement Center', distanceKm: 12.3, status: 'closed' }
+];
+
 function formatReadableDate(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString + 'T00:00:00');
@@ -57,6 +64,41 @@ function setValidation(message, isError = true) {
 function clearValidation() {
   if (!validationBox) return;
   validationBox.textContent = '';
+}
+
+function setBookingCenters(centers) {
+  if (!bookingCenterInput || !Array.isArray(centers) || !centers.length) return;
+  bookingCenterInput.innerHTML = centers.map((center) => {
+    const name = center.name || center.centerName || 'Procurement Center';
+    const distance = Number(center.distanceKm ?? center.distance);
+    const suffix = Number.isFinite(distance) ? ` · ${distance.toFixed(1)} km` : '';
+    const disabled = String(center.status || '').toLowerCase() === 'inactive' || String(center.status || '').toLowerCase() === 'full' || String(center.status || '').toLowerCase() === 'closed';
+    return `<option value="${name}" ${disabled ? 'disabled' : ''}>${name}${suffix}${disabled ? ' (Unavailable)' : ''}</option>`;
+  }).join('');
+  const firstAvailable = [...bookingCenterInput.options].find((option) => !option.disabled);
+  if (firstAvailable) {
+    bookingCenterInput.value = firstAvailable.value;
+    bookingSelection.center = firstAvailable.value;
+  }
+}
+
+function loadBookingCenters() {
+  if (!bookingCenterInput || !navigator.geolocation) {
+    setBookingCenters(fallbackCenters);
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+    try {
+      const params = new URLSearchParams({ latitude: String(coords.latitude), longitude: String(coords.longitude) });
+      const response = await fetch(`/api/procurement-centers?${params}`);
+      if (!response.ok) throw new Error(`Centers API returned ${response.status}`);
+      const payload = await response.json();
+      setBookingCenters(Array.isArray(payload) ? payload : payload.centers);
+    } catch (error) {
+      console.warn('Booking centers API unavailable; using fallback centers.', error);
+      setBookingCenters(fallbackCenters);
+    }
+  }, () => setBookingCenters(fallbackCenters), { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
 }
 
 function setDateDefault() {
@@ -219,6 +261,7 @@ document.getElementById('success-dashboard')?.addEventListener('click', () => {
 if (bookingCenterInput) {
   bookingCenterInput.value = 'Vijayawada Procurement Center';
   bookingSelection.center = bookingCenterInput.value;
+  loadBookingCenters();
 }
 
 setDateDefault();

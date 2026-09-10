@@ -43,12 +43,74 @@ const notificationState = [
 	{ icon: '🟡', type: 'Reminder', title: 'Procurement Reminder', message: 'Your procurement appointment is tomorrow at 10:00 AM.', date: '9 September 2026 · 8:00 AM', unread: true },
 	{ icon: '✓', type: 'Procurement', title: 'Procurement Completed', message: 'Your Rice procurement has been completed successfully.', date: '8 September 2026 · 4:30 PM', unread: false }
 ];
-const procurementCenters = [
+let procurementCenters = [
 	{ name: 'Vijayawada Procurement Center', distance: 2.4, status: 'open', statusLabel: 'Open', waiting: 'low', waitingLabel: 'Low', waitDuration: '20 min', slots: 24, hours: '9:00 AM – 5:00 PM' },
 	{ name: 'Gannavaram Procurement Center', distance: 5.1, status: 'almost', statusLabel: 'Almost Full', waiting: 'medium', waitingLabel: 'Medium', waitDuration: '45 min', slots: 8, hours: '8:30 AM – 4:30 PM' },
 	{ name: 'Mangalagiri Procurement Center', distance: 8.7, status: 'open', statusLabel: 'Open', waiting: 'low', waitingLabel: 'Low', waitDuration: '30 min', slots: 18, hours: '9:00 AM – 5:00 PM' },
 	{ name: 'Ibrahimpatnam Procurement Center', distance: 12.3, status: 'closed', statusLabel: 'Closed', waiting: 'high', waitingLabel: 'High', waitDuration: '1 hr 15 min', slots: 0, hours: 'Opens tomorrow · 9:00 AM' }
 ];
+
+function hasBookableProcurementSlot() {
+	try {
+		const slots = JSON.parse(localStorage.getItem('smartProcureSlots') || 'null');
+		if (!Array.isArray(slots)) return true;
+		return slots.some((slot) => slot.active && Number(slot.booked) < Number(slot.capacity));
+	} catch (error) {
+		return true;
+	}
+}
+
+function showCenterMessage(root, message) {
+	const summary = root.querySelector('#center-summary');
+	if (summary) summary.innerHTML = `<span>${message}</span>`;
+}
+
+function normalizeCenter(center) {
+	const status = String(center.status || 'open').toLowerCase();
+	const statusMap = { open: ['open', 'Open'], available: ['open', 'Available'], almost: ['almost', 'Almost Full'], almost_full: ['almost', 'Almost Full'], closed: ['closed', 'Closed'] };
+	const [statusKey, statusLabel] = statusMap[status] || ['open', 'Open'];
+	const distance = Number(center.distanceKm ?? center.distance ?? 0);
+	return {
+		name: center.name || center.centerName || 'Procurement Center',
+		distance: Number.isFinite(distance) ? distance : 0,
+		status: statusKey,
+		statusLabel,
+		waiting: center.waiting || 'low',
+		waitingLabel: center.waitingLabel || 'Low',
+		waitDuration: center.waitDuration || 'Not available',
+		slots: Number(center.availableSlots ?? center.slots ?? 0),
+		hours: center.hours || center.operatingHours || 'Hours not available'
+	};
+}
+
+async function loadNearbyCenters(root) {
+	if (!navigator.geolocation) {
+		showCenterMessage(root, 'Location is not supported by this browser. Showing demo centers.');
+		return;
+	}
+	showCenterMessage(root, 'Requesting your location...');
+	navigator.geolocation.getCurrentPosition(async (position) => {
+		const { latitude, longitude } = position.coords;
+		try {
+			const params = new URLSearchParams({ latitude: String(latitude), longitude: String(longitude) });
+			const response = await fetch(`/api/procurement-centers?${params}`);
+			if (!response.ok) throw new Error(`Centers API returned ${response.status}`);
+			const payload = await response.json();
+			const centers = Array.isArray(payload) ? payload : payload.centers;
+			if (!Array.isArray(centers)) throw new Error('Invalid centers response');
+			procurementCenters = centers.map(normalizeCenter);
+			showCenterMessage(root, `Centers near ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+			renderCenterCards(root);
+		} catch (error) {
+			console.warn('Nearby centers API unavailable; using demo centers.', error);
+			showCenterMessage(root, 'Live center data unavailable. Showing demo centers.');
+			renderCenterCards(root);
+		}
+	}, () => {
+		showCenterMessage(root, 'Location permission was denied. Showing demo centers.');
+		renderCenterCards(root);
+	}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+}
 
 function renderCenterCards(root = document) {
 	const results = root.querySelector('#center-results');
@@ -76,6 +138,12 @@ function renderCenterCards(root = document) {
 		window.setTimeout(() => toast.classList.remove('show'), 3200);
 	}));
 	results.querySelectorAll('[data-center-action="book"]:not([disabled])').forEach((button) => button.addEventListener('click', () => {
+		if (!hasBookableProcurementSlot()) {
+			toast.textContent = 'No active procurement slots are available. Please try again later.';
+			toast.classList.add('show');
+			window.setTimeout(() => toast.classList.remove('show'), 3200);
+			return;
+		}
 		if (sessionStorage.getItem('smartProcureLoggedIn')) showDetail('token-detail');
 		else showDetail('login-detail');
 	}));
@@ -91,6 +159,13 @@ function setupCentersPage(root = document) {
 		}
 	});
 	renderCenterCards(root);
+	if (!root.querySelector('#center-location-ready')) {
+		const marker = document.createElement('span');
+		marker.id = 'center-location-ready';
+		marker.hidden = true;
+		root.querySelector('#center-summary')?.after(marker);
+		loadNearbyCenters(root);
+	}
 }
 
 function dashboardCentersMarkup() {
