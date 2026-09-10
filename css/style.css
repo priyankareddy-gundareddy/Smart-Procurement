@@ -14,6 +14,14 @@
   --shadow: 0 20px 45px rgba(25, 60, 45, 0.08);
 }
 
+/* Farmer language and voice controls */
+.farmer-language-switcher{align-items:center;display:flex;gap:5px;margin-left:auto;white-space:nowrap;font-size:11px}
+.farmer-language-switcher button{background:transparent;border:1px solid currentColor;border-radius:4px;color:inherit;cursor:pointer;font:inherit;padding:4px 7px}
+.farmer-language-switcher button.active{background:#204b3e;color:#fff}
+.dashboard-header{position:relative}
+.dashboard-header>.farmer-language-switcher{position:absolute;right:0;top:0;margin:0}
+@media(max-width:680px){.farmer-language-switcher{font-size:10px;order:3;width:100%;justify-content:flex-end;margin-top:8px}.dashboard-header>.farmer-language-switcher{width:auto;margin-top:0}}
+
 * {
   box-sizing: border-box;
 }

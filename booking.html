@@ -55,6 +55,11 @@
         </div>
 
         <div class="field-group">
+          <label for="booking-quantity">Select Quantity</label>
+          <input id="booking-quantity" type="number" min="1" step="1" placeholder="Enter quantity in kg" />
+        </div>
+
+        <div class="field-group">
           <label for="booking-center">Select Procurement Center</label>
           <select id="booking-center">
             <option value="Vijayawada Procurement Center">Vijayawada Procurement Center</option>
@@ -95,6 +100,10 @@
           <div class="confirm-row">
             <span>Crop</span>
             <strong id="confirm-crop">Not selected</strong>
+          </div>
+          <div class="confirm-row">
+            <span>Quantity</span>
+            <strong id="confirm-quantity">Not selected</strong>
           </div>
           <div class="confirm-row">
             <span>Procurement Center</span>
@@ -147,6 +156,10 @@
             <strong id="success-crop">Not selected</strong>
           </div>
           <div class="confirm-row">
+            <span>Quantity</span>
+            <strong id="success-quantity">Not selected</strong>
+          </div>
+          <div class="confirm-row">
             <span>Date</span>
             <strong id="success-date">10 September 2026</strong>
           </div>
@@ -169,6 +182,9 @@
     </div>
   </main>
 
-  <script src="js/script.js"></script>
+  <script src="translations/en.js?v=farmer-language-3"></script>
+  <script src="translations/te.js?v=farmer-language-3"></script>
+  <script src="js/farmer-i18n.js?v=farmer-language-7"></script>
+  <script src="js/script.js?v=farmer-language-2"></script>
 </body>
 </html>

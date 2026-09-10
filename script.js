@@ -12,7 +12,10 @@ document.querySelector('#dashboard-preview')?.remove();
 const publicCentersSection = document.getElementById('centers-detail');
 if (publicCentersSection) publicCentersSection.id = 'public-centers';
 document.querySelectorAll('[data-detail="centers-detail"]').forEach((link) => {
-	if (!link.closest('#farmer-dashboard')) {
+	if (link.closest('#farmer-dashboard')) {
+		link.dataset.detail = 'dashboard-centers';
+		link.href = '#dashboard-centers';
+	} else {
 		link.dataset.detail = 'public-centers';
 		link.href = '#public-centers';
 	}
@@ -65,6 +68,19 @@ function showCenterMessage(root, message) {
 	if (summary) summary.innerHTML = `<span>${message}</span>`;
 }
 
+function farmerText(key, fallback) {
+	return window.farmerI18n?.getValue(key) || fallback;
+}
+
+function farmerCenterName(name) {
+	return window.farmerI18n?.getCenterName(name) || name;
+}
+
+function farmerDuration(value) {
+	if (window.farmerI18n?.getLanguage() !== 'te') return value;
+	return String(value).replace(/\bhr\b/g, farmerText('center.hoursShort', 'hr')).replace(/\bmin\b/g, farmerText('center.minutes', 'min'));
+}
+
 function normalizeCenter(center) {
 	const status = String(center.status || 'open').toLowerCase();
 	const statusMap = { open: ['open', 'Open'], available: ['open', 'Available'], almost: ['almost', 'Almost Full'], almost_full: ['almost', 'Almost Full'], closed: ['closed', 'Closed'] };
@@ -85,10 +101,10 @@ function normalizeCenter(center) {
 
 async function loadNearbyCenters(root) {
 	if (!navigator.geolocation) {
-		showCenterMessage(root, 'Location is not supported by this browser. Showing demo centers.');
+		showCenterMessage(root, farmerText('center.locationUnsupported', 'Location is not supported by this browser. Showing demo centers.'));
 		return;
 	}
-	showCenterMessage(root, 'Requesting your location...');
+	showCenterMessage(root, farmerText('center.requesting', 'Requesting your location...'));
 	navigator.geolocation.getCurrentPosition(async (position) => {
 		const { latitude, longitude } = position.coords;
 		try {
@@ -99,15 +115,15 @@ async function loadNearbyCenters(root) {
 			const centers = Array.isArray(payload) ? payload : payload.centers;
 			if (!Array.isArray(centers)) throw new Error('Invalid centers response');
 			procurementCenters = centers.map(normalizeCenter);
-			showCenterMessage(root, `Centers near ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+			showCenterMessage(root, `${farmerText('center.centersNear', 'Centers near')} ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
 			renderCenterCards(root);
 		} catch (error) {
 			console.warn('Nearby centers API unavailable; using demo centers.', error);
-			showCenterMessage(root, 'Live center data unavailable. Showing demo centers.');
+			showCenterMessage(root, farmerText('center.liveUnavailable', 'Live center data unavailable. Showing demo centers.'));
 			renderCenterCards(root);
 		}
 	}, () => {
-		showCenterMessage(root, 'Location permission was denied. Showing demo centers.');
+		showCenterMessage(root, farmerText('center.permissionDenied', 'Location permission was denied. Showing demo centers.'));
 		renderCenterCards(root);
 	}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
 }
@@ -129,9 +145,9 @@ function renderCenterCards(root = document) {
 	if (summary) {
 		const totalSlots = filtered.reduce((total, center) => total + center.slots, 0);
 		const averageWait = filtered.length ? Math.round(filtered.reduce((total, center) => total + (center.waiting === 'low' ? 25 : center.waiting === 'medium' ? 45 : 75), 0) / filtered.length) : 0;
-		summary.innerHTML = `<span><strong>${filtered.length}</strong> centers found</span><span><strong>${totalSlots}</strong> available slots</span><span><strong>${averageWait ? `${averageWait} min` : '—'}</strong> average waiting time</span>`;
+		summary.innerHTML = `<span><strong>${filtered.length}</strong> ${farmerText('center.found', 'centers found')}</span><span><strong>${totalSlots}</strong> ${farmerText('center.availableSlots', 'available slots')}</span><span><strong>${averageWait ? `${averageWait} ${farmerText('center.minutes', 'min')}` : '—'}</strong> ${farmerText('center.averageWait', 'average waiting time')}</span>`;
 	}
-	results.innerHTML = filtered.length ? filtered.map((center) => `<article class="center-card" data-center-name="${center.name}"><div class="center-card-heading"><span class="center-icon">⌖</span><div><h3>${center.name}</h3><p>${center.distance.toFixed(1)} km away</p></div><span class="center-status ${center.status}">${center.statusLabel}</span></div><div class="center-card-data"><span><small>Waiting time</small><strong class="wait-${center.waiting}">${center.waitDuration} · ${center.waitingLabel}</strong></span><span><small>Available slots</small><strong>${center.slots} slots</strong></span><span><small>Operating hours</small><strong>${center.hours}</strong></span></div><div class="center-card-actions"><button class="button button-outline center-map-action" type="button" data-center-action="map">View on Map</button><button class="button button-primary center-book-action" type="button" data-center-action="book" ${center.status === 'closed' ? 'disabled' : ''}>Book Slot</button></div></article>`).join('') : '<div class="empty-centers"><strong>No centers match your filters.</strong><span>Try another search or filter.</span></div>';
+	results.innerHTML = filtered.length ? filtered.map((center) => `<article class="center-card" data-center-name="${center.name}"><div class="center-card-heading"><span class="center-icon">⌖</span><div><h3>${farmerCenterName(center.name)}</h3><p>${center.distance.toFixed(1)} ${farmerText('center.away', 'km away')}</p></div><span class="center-status ${center.status}">${center.statusLabel}</span></div><div class="center-card-data"><span><small>${farmerText('center.waiting', 'Waiting Time')}</small><strong class="wait-${center.waiting}">${farmerDuration(center.waitDuration)} · ${farmerText(`center.${center.waiting}`, center.waitingLabel)}</strong></span><span><small>${farmerText('center.availableSlots', 'available slots')}</small><strong>${center.slots} ${farmerText('center.slots', 'slots')}</strong></span><span><small>${farmerText('center.hours', 'Operating hours')}</small><strong>${farmerDuration(center.hours.replace('Opens tomorrow', farmerText('center.opensTomorrow', 'Opens tomorrow')))}</strong></span></div><div class="center-card-actions"><button class="button button-outline center-map-action" type="button" data-center-action="map">${farmerText('center.viewMap', 'View on Map')}</button><button class="button button-primary center-book-action" type="button" data-center-action="book" ${center.status === 'closed' ? 'disabled' : ''}>${farmerText('center.book', 'Book Slot')}</button></div></article>`).join('') : `<div class="empty-centers"><strong>${farmerText('center.noMatch', 'No centers match your filters.')}</strong><span>${farmerText('center.tryAnother', 'Try another search or filter.')}</span></div>`;
 	results.querySelectorAll('[data-center-action="map"]').forEach((button) => button.addEventListener('click', () => {
 		toast.textContent = 'Map integration is planned for the next phase.';
 		toast.classList.add('show');
@@ -167,6 +183,13 @@ function setupCentersPage(root = document) {
 		loadNearbyCenters(root);
 	}
 }
+
+window.addEventListener('farmer-language-changed', () => {
+	document.querySelectorAll('#center-results').forEach((results) => {
+		const root = results.closest('.centers-page, .dashboard-subview') || document;
+		renderCenterCards(root);
+	});
+});
 
 function dashboardCentersMarkup() {
 	return `<span class="section-kicker">Farmer dashboard · Step 6</span><h2>Nearby Procurement Centers</h2><p class="dashboard-subview-lede">Find nearby procurement centers, check availability, and book your slot.</p><div class="center-tools"><label class="center-search"><span>⌕</span><input id="center-search" type="search" placeholder="Search procurement centers..." aria-label="Search procurement centers"></label><label><span>Distance</span><select id="center-distance"><option value="all">All distances</option><option value="5">Within 5 km</option><option value="10">Within 10 km</option></select></label><label><span>Status</span><select id="center-status"><option value="all">All statuses</option><option value="open">Open</option><option value="almost">Almost Full</option><option value="closed">Closed</option></select></label><label><span>Waiting Time</span><select id="center-waiting"><option value="all">Any wait</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label></div><div class="center-summary" id="center-summary"></div><div class="centers-layout"><div class="center-results" id="center-results"></div><aside class="centers-map" aria-label="Procurement Centers Map"><div class="map-grid"></div><span class="map-marker marker-one">⌖</span><span class="map-marker marker-two">⌖</span><span class="map-marker marker-three">⌖</span><div class="map-copy"><span>🗺️</span><h3>Procurement Centers Map</h3><p>Interactive map will be available here.</p></div></aside></div>`;
@@ -205,7 +228,7 @@ function renderDashboardView(viewId) {
 	if (!dashboard || !panel) return;
 	dashboard.classList.toggle('dashboard-subview-active', viewId !== 'farmer-dashboard');
 	const views = {
-		'dashboard-centers': ['Nearby Centers', 'Centers near your registered location, Gannavaram.', `<div class="dashboard-data-grid dashboard-center-grid">${procurementCenters.map((center) => `<article><span class="dashboard-data-icon">${center.distance.toFixed(1)} km away · ${center.statusLabel}</span><h3>${center.name}</h3><p>Waiting time: <strong>${center.waitDuration} · ${center.waitingLabel}</strong></p><strong>${center.slots} available slots</strong><button class="button button-primary dashboard-demo-button" type="button" ${center.status === 'closed' ? 'disabled' : ''}>Book Slot</button></article>`).join('')}</div>`],
+		'dashboard-centers': ['Nearby Centers', 'Centers near your registered location, Gannavaram.', `<div class="dashboard-data-grid dashboard-center-grid">${procurementCenters.map((center) => `<article><span class="dashboard-data-icon">${center.distance.toFixed(1)} km away · ${center.statusLabel}</span><h3>${farmerCenterName(center.name)}</h3><p>Waiting time: <strong>${center.waitDuration} · ${center.waitingLabel}</strong></p><strong>${center.slots} available slots</strong><button class="button button-primary dashboard-demo-button" type="button" ${center.status === 'closed' ? 'disabled' : ''}>Book Slot</button></article>`).join('')}</div>`],
 		'token-detail': ['My Bookings', 'View your upcoming and previous slot bookings.', getAllBookingsMarkup()],
 		'status-detail': ['Procurement Status', 'Track the procurement status of all your bookings', getAllProcurementStatusMarkup()],
 		'notifications-detail': ['Notifications', 'Stay updated about your procurement activities.', getNotificationsMarkup()],
@@ -289,7 +312,7 @@ function getProcurementStatusMarkup() {
 		token: booking.token || 'SP-1024',
 		crop: booking.crop || 'Paddy',
 		quantity: booking.quantity ? `${booking.quantity} kg` : '500 kg',
-		center: booking.center || 'Vijayawada Procurement Center',
+		center: farmerCenterName(booking.center || 'Vijayawada Procurement Center'),
 		date: formatStatusDate(booking.date),
 		time: formatStatusTime(booking.time)
 	};
@@ -305,7 +328,7 @@ function getAllProcurementStatusMarkup() {
 function getAllBookingsMarkup() {
 	const bookings = getStatusBookings();
 	if (!bookings.length) return '<div class="empty-status-board"><strong>No bookings yet.</strong><span>Your confirmed procurement slots will appear here.</span></div>';
-	return `<div class="dashboard-booking-board">${bookings.map((booking, index) => `<article class="dashboard-booking-card"><div class="dashboard-booking-card-top"><span class="dashboard-data-icon">Booking ${index + 1}</span><span class="booking-status">${booking.status || 'Confirmed'}</span></div><h3>${booking.token || `SP-${index + 1}`}</h3><p>${booking.center || 'Selected Center'}</p><div class="dashboard-booking-meta"><span><small>Crop</small><strong>${booking.crop || 'Rice'}</strong></span><span><small>Quantity</small><strong>${booking.quantity ? `${booking.quantity} kg` : '500 kg'}</strong></span><span><small>Date</small><strong>${formatStatusDate(booking.date)}</strong></span><span><small>Time</small><strong>${formatStatusTime(booking.time)}</strong></span></div></article>`).join('')}</div>`;
+	return `<div class="dashboard-booking-board">${bookings.map((booking, index) => `<article class="dashboard-booking-card"><div class="dashboard-booking-card-top"><span class="dashboard-data-icon">Booking ${index + 1}</span><span class="booking-status">${booking.status || 'Confirmed'}</span></div><h3>${booking.token || `SP-${index + 1}`}</h3><p>${farmerCenterName(booking.center || 'Selected Center')}</p><div class="dashboard-booking-meta"><span><small>Crop</small><strong>${booking.crop || 'Rice'}</strong></span><span><small>Quantity</small><strong>${booking.quantity ? `${booking.quantity} kg` : '500 kg'}</strong></span><span><small>Date</small><strong>${formatStatusDate(booking.date)}</strong></span><span><small>Time</small><strong>${formatStatusTime(booking.time)}</strong></span></div></article>`).join('')}</div>`;
 }
 
 function getProcurementStatusCardMarkup(booking) {
@@ -313,7 +336,7 @@ function getProcurementStatusCardMarkup(booking) {
 		token: booking.token || 'SP-1024',
 		crop: booking.crop || 'Paddy',
 		quantity: booking.quantity ? `${booking.quantity} kg` : '500 kg',
-		center: booking.center || 'Vijayawada Procurement Center',
+		center: farmerCenterName(booking.center || 'Vijayawada Procurement Center'),
 		date: formatStatusDate(booking.date),
 		time: formatStatusTime(booking.time)
 	};
@@ -536,12 +559,12 @@ if (loginForm) {
 			sessionStorage.setItem('smartProcureLoggedIn', 'true');
 			sessionStorage.setItem('smartProcureCurrentFarmer', JSON.stringify(farmer));
 			updateDashboardProfileBadge(farmer);
-			toast.textContent = 'Login successful. Welcome back, ' + farmer.fullName + '.';
+			toast.textContent = `${farmerText('messages.loginSuccess', 'Login successful. Welcome back.')} ${farmer.fullName}.`;
 			showDetail('farmer-dashboard');
 		} else if (!getStoredAccounts().length) {
-			toast.textContent = 'No account found. Please register first.';
+			toast.textContent = farmerText('login.noAccountFound', 'No account found. Please register first.');
 		} else {
-			toast.textContent = 'The mobile number or password does not match your account.';
+			toast.textContent = farmerText('login.invalid', 'The mobile number or password does not match your account.');
 		}
 		toast.classList.add('show');
 		window.setTimeout(() => toast.classList.remove('show'), 3200);

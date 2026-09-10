@@ -38,7 +38,7 @@ function loadBookings() {
         <span class="booking-id">${booking.token || `SP-${index + 1}`}</span>
         <span class="booking-status">${booking.status || 'Confirmed'}</span>
       </div>
-      <h3>${booking.center || 'Selected Center'}</h3>
+      <h3>${window.farmerI18n?.getCenterName(booking.center || 'Selected Center') || booking.center || 'Selected Center'}</h3>
       <div class="booking-meta-grid">
         <div>
           <small>Date</small>
