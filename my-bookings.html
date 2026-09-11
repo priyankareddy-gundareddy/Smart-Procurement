@@ -3,51 +3,130 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>SmartProcure | My Bookings</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet"
+  />
+
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="booking-page-body">
-  <header class="booking-header">
-    <div class="booking-header-inner container">
-      <a class="brand" href="index.html#home" aria-label="SmartProcure home">
-        <span class="brand-mark">S</span>
-        <span>Smart<span>Procure</span></span>
+
+<header class="booking-header">
+
+  <div class="booking-header-inner container">
+
+    <a
+            class="brand"
+            href="index.html#home"
+            aria-label="SmartProcure home"
+    >
+      <span class="brand-mark">S</span>
+
+      <span>
+        Smart<span>Procure</span>
+      </span>
+    </a>
+
+    <nav
+            class="booking-nav"
+            aria-label="Farmer navigation"
+    >
+
+      <a href="index.html#farmer-dashboard">
+        Dashboard
       </a>
 
-      <nav class="booking-nav" aria-label="Farmer navigation">
-        <a href="index.html#farmer-dashboard">Dashboard</a>
-        <a href="index.html#public-centers">Centers</a>
-        <a href="my-bookings.html" class="active">My Bookings</a>
-        <a href="index.html#profile-detail">Profile</a>
-        <a href="index.html#login-detail">Logout</a>
-      </nav>
+      <a href="index.html#public-centers">
+        Centers
+      </a>
+
+      <a
+              href="my-bookings.html"
+              class="active"
+      >
+        My Bookings
+      </a>
+
+      <a href="index.html#profile-detail">
+        Profile
+      </a>
+
+      <a href="index.html#login-detail">
+        Logout
+      </a>
+
+    </nav>
+
+  </div>
+
+</header>
+
+
+<main class="container booking-page">
+
+  <section class="booking-hero">
+
+    <p class="section-kicker">
+      Farmer bookings
+    </p>
+
+    <h1>
+      My Bookings
+    </h1>
+
+    <p class="booking-lead">
+      Review your current and upcoming procurement slot bookings.
+    </p>
+
+  </section>
+
+
+  <section class="booking-card bookings-card">
+
+    <div class="booking-list-header">
+
+      <h2>
+        Booking History
+      </h2>
+
+      <a
+              href="booking.html"
+              class="primary-button small-button"
+      >
+        + New Booking
+      </a>
+
     </div>
-  </header>
 
-  <main class="container booking-page">
-    <section class="booking-hero">
-      <p class="section-kicker">Farmer bookings</p>
-      <h1>My Bookings</h1>
-      <p class="booking-lead">Review your current and upcoming procurement slot bookings.</p>
-    </section>
 
-    <section class="booking-card bookings-card">
-      <div class="booking-list-header">
-        <h2>Booking History</h2>
-        <a href="booking.html" class="primary-button small-button">+ New Booking</a>
-      </div>
+    <div
+            id="booking-list"
+            class="booking-list"
+    ></div>
 
-      <div id="booking-list" class="booking-list"></div>
-    </section>
-  </main>
+  </section>
 
-  <script src="translations/en.js?v=farmer-language-3"></script>
-  <script src="translations/te.js?v=farmer-language-3"></script>
-  <script src="js/farmer-i18n.js?v=farmer-language-7"></script>
-  <script src="js/script.js?v=farmer-language-2"></script>
-  <script src="js/bookings.js?v=farmer-language-2"></script>
+</main>
+
+
+<script src="translations/en.js?v=farmer-language-3"></script>
+
+<script src="translations/te.js?v=farmer-language-3"></script>
+
+<script src="js/farmer-i18n.js?v=farmer-language-7"></script>
+
+<script src="js/script.js?v=farmer-language-2"></script>
+
+<!-- Backend-connected My Bookings -->
+<script src="js/bookings.js?v=backend-bookings-2"></script>
+
 </body>
 </html>

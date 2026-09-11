@@ -1,190 +1,589 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>SmartProcure | Book a Procurement Slot</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet"
+  />
+
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="booking-page-body">
-  <header class="booking-header">
-    <div class="booking-header-inner container">
-      <a class="brand" href="index.html#home" aria-label="SmartProcure home">
-        <span class="brand-mark">S</span>
-        <span>Smart<span>Procure</span></span>
+
+<header class="booking-header">
+
+  <div class="booking-header-inner container">
+
+    <a
+            class="brand"
+            href="index.html#home"
+            aria-label="SmartProcure home"
+    >
+      <span class="brand-mark">S</span>
+      <span>Smart<span>Procure</span></span>
+    </a>
+
+
+    <div class="booking-dashboard-hero">
+
+        <span class="booking-dashboard-kicker">
+          SmartProcure dashboard
+        </span>
+
+      <h1>
+        Welcome, <em>Farmer</em> 👋
+      </h1>
+
+      <p>
+        Manage your procurement, bookings, and center visits from one place.
+      </p>
+
+    </div>
+
+
+    <nav
+            class="booking-nav"
+            aria-label="Farmer navigation"
+    >
+
+      <a href="index.html#farmer-dashboard">
+        Dashboard
       </a>
 
-      <div class="booking-dashboard-hero">
-        <span class="booking-dashboard-kicker">SmartProcure dashboard</span>
-        <h1>Welcome, <em>Farmer</em> 👋</h1>
-        <p>Manage your procurement, bookings, and center visits from one place.</p>
-      </div>
+      <a href="index.html#public-centers">
+        Centers
+      </a>
 
-      <nav class="booking-nav" aria-label="Farmer navigation">
-        <a href="index.html#farmer-dashboard">Dashboard</a>
-        <a href="index.html#public-centers">Centers</a>
-        <a href="my-bookings.html">Bookings</a>
-        <a href="booking.html" class="active">Procurement</a>
-        <a href="index.html#notifications-detail">Notifications</a>
-      </nav>
-    </div>
-  </header>
+      <a href="my-bookings.html">
+        Bookings
+      </a>
 
-  <main class="container booking-page">
-    <div class="booking-step-screen" id="booking-step-1">
-      <div class="booking-topbar">
-        <button type="button" class="back-link" id="back-to-dashboard">← Back to Dashboard</button>
-      </div>
+      <a
+              href="booking.html"
+              class="active"
+      >
+        Procurement
+      </a>
 
-      <div class="booking-card booking-form-card">
-        <h1>Book a Procurement Slot</h1>
+      <a href="index.html#notifications-detail">
+        Notifications
+      </a>
 
-        <div class="field-group">
-          <label for="booking-crop">Select Crop</label>
-          <select id="booking-crop">
-            <option value="">Choose a crop</option>
-            <option value="Rice">Rice</option>
-            <option value="Wheat">Wheat</option>
-            <option value="Maize">Maize</option>
-            <option value="Cotton">Cotton</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+    </nav>
 
-        <div class="field-group">
-          <label for="booking-quantity">Select Quantity</label>
-          <input id="booking-quantity" type="number" min="1" step="1" placeholder="Enter quantity in kg" />
-        </div>
+  </div>
 
-        <div class="field-group">
-          <label for="booking-center">Select Procurement Center</label>
-          <select id="booking-center">
-            <option value="Vijayawada Procurement Center">Vijayawada Procurement Center</option>
-            <option value="Guntur Procurement Center">Guntur Procurement Center</option>
-            <option value="Mangalagiri Procurement Center">Mangalagiri Procurement Center</option>
-            <option value="Amaravati Procurement Center">Amaravati Procurement Center</option>
-          </select>
-        </div>
+</header>
 
-        <div class="field-group">
-          <label for="booking-date">Select Date</label>
-          <input id="booking-date" type="date" />
-        </div>
 
-        <div class="time-slot-section">
-          <h2>Select Time Slot</h2>
-          <div class="slot-grid" id="slot-grid"></div>
-        </div>
+<main class="container booking-page">
 
-        <div id="booking-validation" class="booking-validation" aria-live="polite"></div>
 
-        <div class="action-row">
-          <button type="button" class="secondary-button" id="cancel-booking">Cancel</button>
-          <button type="button" class="primary-button" id="continue-booking">Continue</button>
-        </div>
-      </div>
+  <!-- ================= STEP 1 ================= -->
+
+  <div
+          class="booking-step-screen"
+          id="booking-step-1"
+  >
+
+    <div class="booking-topbar">
+
+      <button
+              type="button"
+              class="back-link"
+              id="back-to-dashboard"
+      >
+        ← Back to Dashboard
+      </button>
+
     </div>
 
-    <div class="booking-step-screen hidden" id="booking-step-2">
-      <div class="booking-topbar">
-        <button type="button" class="back-link" id="back-to-step-1">← Back</button>
+
+    <div class="booking-card booking-form-card">
+
+      <h1>
+        Book a Procurement Slot
+      </h1>
+
+
+      <!-- CROP -->
+
+      <div class="field-group">
+
+        <label for="booking-crop">
+          Select Crop
+        </label>
+
+        <select id="booking-crop">
+
+          <option value="">
+            Choose a crop
+          </option>
+
+          <option value="Rice">
+            Rice
+          </option>
+
+          <option value="Wheat">
+            Wheat
+          </option>
+
+          <option value="Maize">
+            Maize
+          </option>
+
+          <option value="Cotton">
+            Cotton
+          </option>
+
+          <option value="Other">
+            Other
+          </option>
+
+        </select>
+
       </div>
 
-      <div class="booking-card booking-confirm-card">
-        <h1>Confirm Your Booking</h1>
 
-        <div class="confirmation-grid">
-          <div class="confirm-row">
-            <span>Crop</span>
-            <strong id="confirm-crop">Not selected</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Quantity</span>
-            <strong id="confirm-quantity">Not selected</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Procurement Center</span>
-            <strong id="confirm-center">Vijayawada Procurement Center</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Date</span>
-            <strong id="confirm-date">10 September 2026</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Time</span>
-            <strong id="confirm-time">10:00 AM</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Farmer</span>
-            <strong>Priyanka</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Mobile</span>
-            <strong>XXXXXXXXXX</strong>
-          </div>
-        </div>
+      <!-- QUANTITY -->
 
-        <p class="confirmation-note">Please verify your details before confirming.</p>
+      <div class="field-group">
 
-        <div class="action-row">
-          <button type="button" class="secondary-button" id="confirm-back">← Back</button>
-          <button type="button" class="primary-button" id="confirm-booking">Confirm Booking</button>
-        </div>
+        <label for="booking-quantity">
+          Select Quantity
+        </label>
+
+        <input
+                id="booking-quantity"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="Enter quantity in kg"
+        />
+
       </div>
+
+
+      <!-- PROCUREMENT CENTRE -->
+
+      <div class="field-group">
+
+        <label for="booking-center">
+          Select Procurement Center
+        </label>
+
+        <select id="booking-center">
+
+          <option value="">
+            Loading procurement centres...
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- DATE -->
+
+      <div class="field-group">
+
+        <label for="booking-date">
+          Select Date
+        </label>
+
+        <input
+                id="booking-date"
+                type="date"
+        />
+
+      </div>
+
+
+      <!-- TIME SLOT -->
+
+      <div class="time-slot-section">
+
+        <h2>
+          Select Time Slot
+        </h2>
+
+        <div
+                class="slot-grid"
+                id="slot-grid"
+        ></div>
+
+      </div>
+
+
+      <!-- VALIDATION -->
+
+      <div
+              id="booking-validation"
+              class="booking-validation"
+              aria-live="polite"
+      ></div>
+
+
+      <!-- BUTTONS -->
+
+      <div class="action-row">
+
+        <button
+                type="button"
+                class="secondary-button"
+                id="cancel-booking"
+        >
+          Cancel
+        </button>
+
+        <button
+                type="button"
+                class="primary-button"
+                id="continue-booking"
+        >
+          Continue
+        </button>
+
+      </div>
+
     </div>
 
-    <div class="booking-step-screen hidden" id="booking-step-3">
-      <div class="booking-card success-card-full">
-        <div class="success-icon">✓</div>
-        <h1>Booking Confirmed!</h1>
-        <p class="success-message">Your procurement slot has been successfully booked.</p>
+  </div>
 
-        <div class="success-details">
-          <div class="confirm-row">
-            <span>Booking ID</span>
-            <strong id="success-booking-id">SP20260910001</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Center</span>
-            <strong id="success-center">Vijayawada Procurement Center</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Crop</span>
-            <strong id="success-crop">Not selected</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Quantity</span>
-            <strong id="success-quantity">Not selected</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Date</span>
-            <strong id="success-date">10 September 2026</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Time</span>
-            <strong id="success-time">10:00 AM</strong>
-          </div>
-          <div class="confirm-row">
-            <span>Status</span>
-            <strong>Confirmed</strong>
-          </div>
-        </div>
 
-        <div class="action-row success-actions-row">
-          <button type="button" class="primary-button" id="view-bookings">View My Bookings</button>
-          <button type="button" class="primary-button" id="view-procurement-status">View Procurement Status</button>
-          <button type="button" class="secondary-button" id="success-dashboard">Back to Dashboard</button>
-        </div>
-      </div>
+  <!-- ================= STEP 2 ================= -->
+
+  <div
+          class="booking-step-screen hidden"
+          id="booking-step-2"
+  >
+
+    <div class="booking-topbar">
+
+      <button
+              type="button"
+              class="back-link"
+              id="back-to-step-1"
+      >
+        ← Back
+      </button>
+
     </div>
-  </main>
 
-  <script src="translations/en.js?v=farmer-language-3"></script>
-  <script src="translations/te.js?v=farmer-language-3"></script>
-  <script src="js/farmer-i18n.js?v=farmer-language-7"></script>
-  <script src="js/script.js?v=farmer-language-2"></script>
+
+    <div class="booking-card booking-confirm-card">
+
+      <h1>
+        Confirm Your Booking
+      </h1>
+
+
+      <div class="confirmation-grid">
+
+
+        <div class="confirm-row">
+
+            <span>
+              Crop
+            </span>
+
+          <strong id="confirm-crop">
+            Not selected
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Quantity
+            </span>
+
+          <strong id="confirm-quantity">
+            Not selected
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Procurement Center
+            </span>
+
+          <strong id="confirm-center">
+            -
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Date
+            </span>
+
+          <strong id="confirm-date">
+            -
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Time
+            </span>
+
+          <strong id="confirm-time">
+            -
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Farmer
+            </span>
+
+          <strong>
+            Priyanka
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Mobile
+            </span>
+
+          <strong>
+            XXXXXXXXXX
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+      <p class="confirmation-note">
+        Please verify your details before confirming.
+      </p>
+
+
+      <div class="action-row">
+
+        <button
+                type="button"
+                class="secondary-button"
+                id="confirm-back"
+        >
+          ← Back
+        </button>
+
+        <button
+                type="button"
+                class="primary-button"
+                id="confirm-booking"
+        >
+          Confirm Booking
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= STEP 3 ================= -->
+
+  <div
+          class="booking-step-screen hidden"
+          id="booking-step-3"
+  >
+
+    <div class="booking-card success-card-full">
+
+      <div class="success-icon">
+        ✓
+      </div>
+
+
+      <h1>
+        Booking Confirmed!
+      </h1>
+
+
+      <p class="success-message">
+        Your procurement slot has been successfully booked.
+      </p>
+
+
+      <div class="success-details">
+
+
+        <div class="confirm-row">
+
+            <span>
+              Booking ID
+            </span>
+
+          <strong id="success-booking-id">
+            -
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Center
+            </span>
+
+          <strong id="success-center">
+            -
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Crop
+            </span>
+
+          <strong id="success-crop">
+            Not selected
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Quantity
+            </span>
+
+          <strong id="success-quantity">
+            Not selected
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Date
+            </span>
+
+          <strong id="success-date">
+            -
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Time
+            </span>
+
+          <strong id="success-time">
+            -
+          </strong>
+
+        </div>
+
+
+        <div class="confirm-row">
+
+            <span>
+              Status
+            </span>
+
+          <strong>
+            Confirmed
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="action-row success-actions-row">
+
+        <button
+                type="button"
+                class="primary-button"
+                id="view-bookings"
+        >
+          View My Bookings
+        </button>
+
+
+        <button
+                type="button"
+                class="primary-button"
+                id="view-procurement-status"
+        >
+          View Procurement Status
+        </button>
+
+
+        <button
+                type="button"
+                class="secondary-button"
+                id="success-dashboard"
+        >
+          Back to Dashboard
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script src="translations/en.js?v=farmer-language-3"></script>
+
+<script src="translations/te.js?v=farmer-language-3"></script>
+
+<script src="js/farmer-i18n.js?v=farmer-language-7"></script>
+
+<script src="script.js?v=booking-backend-2"></script>
+
+
 </body>
+
 </html>

@@ -1,37 +1,281 @@
-const farmerSearch = document.getElementById('farmer-search');
-const farmerRows = [...document.querySelectorAll('#farmers-table tbody tr')];
-const farmerEmptyState = document.getElementById('farmer-empty-state');
-const farmerToast = document.querySelector('.admin-toast');
+const farmerTable =
+    document.querySelector('#farmers-table');
+
+const farmerSearch =
+    document.getElementById('farmer-search');
+
+const farmerEmptyState =
+    document.getElementById('farmer-empty-state');
+
+const farmerToast =
+    document.querySelector('.admin-toast');
+
+let farmers = [];
+
+
+/* ================= TOAST ================= */
 
 function showFarmerToast(message) {
-  if (!farmerToast) return;
+
+  if (!farmerToast) {
+    return;
+  }
+
   farmerToast.textContent = message;
+
   farmerToast.classList.add('show');
-  window.setTimeout(() => farmerToast.classList.remove('show'), 2600);
+
+  window.setTimeout(() => {
+    farmerToast.classList.remove('show');
+  }, 2600);
 }
 
-farmerSearch?.addEventListener('input', () => {
-  const query = farmerSearch.value.trim().toLowerCase().replace(/\D/g, '') || farmerSearch.value.trim().toLowerCase();
-  let visibleRows = 0;
-  farmerRows.forEach((row) => {
-    const matches = row.dataset.farmer.includes(query);
-    row.hidden = !matches;
-    if (matches) visibleRows += 1;
-  });
-  if (farmerEmptyState) farmerEmptyState.hidden = visibleRows !== 0;
-});
 
-document.querySelectorAll('.farmer-details').forEach((button) => {
-  button.addEventListener('click', () => showFarmerToast(`${button.dataset.name}'s farmer details are available in the frontend demo.`));
-});
+/* ================= LOAD FARMERS ================= */
 
-document.querySelectorAll('.farmer-toggle').forEach((button) => {
-  button.addEventListener('click', () => {
-    const status = button.closest('tr').querySelector('.admin-status');
-    const isActive = status.textContent.trim() === 'Active';
-    status.textContent = isActive ? 'Inactive' : 'Active';
-    status.className = `admin-status ${isActive ? 'pending' : 'completed'}`;
-    button.textContent = isActive ? 'Activate' : 'Deactivate';
-    showFarmerToast(`Farmer account ${isActive ? 'deactivated' : 'activated'}.`);
-  });
-});
+async function loadFarmers() {
+
+  if (!farmerTable) {
+    console.error('Farmers table not found');
+    return;
+  }
+
+  const tbody =
+      farmerTable.querySelector('tbody');
+
+
+  tbody.innerHTML = `
+        <tr>
+            <td colspan="7">
+                Loading farmers...
+            </td>
+        </tr>
+    `;
+
+
+  try {
+
+    const response =
+        await fetch(
+            'http://localhost:8080/api/farmers'
+        );
+
+
+    if (!response.ok) {
+      throw new Error(
+          'Failed to load farmers'
+      );
+    }
+
+
+    farmers =
+        await response.json();
+
+
+    renderFarmers();
+
+
+  } catch (error) {
+
+    console.error(
+        'Error loading farmers:',
+        error
+    );
+
+
+    tbody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    Failed to load farmers.
+                </td>
+            </tr>
+        `;
+
+  }
+}
+
+
+/* ================= RENDER FARMERS ================= */
+
+function renderFarmers() {
+
+  if (!farmerTable) {
+    return;
+  }
+
+
+  const tbody =
+      farmerTable.querySelector('tbody');
+
+
+  const query =
+      farmerSearch?.value
+          .trim()
+          .toLowerCase() || '';
+
+
+  const filtered =
+      farmers.filter((farmer) => {
+
+        return `
+                ${farmer.id}
+                ${farmer.name}
+                ${farmer.phone}
+                ${farmer.state}
+                ${farmer.district}
+            `
+            .toLowerCase()
+            .includes(query);
+
+      });
+
+
+  if (!filtered.length) {
+
+    tbody.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    No farmers found.
+                </td>
+            </tr>
+        `;
+
+
+    if (farmerEmptyState) {
+      farmerEmptyState.hidden = false;
+    }
+
+
+    return;
+  }
+
+
+  if (farmerEmptyState) {
+    farmerEmptyState.hidden = true;
+  }
+
+
+  tbody.innerHTML =
+      filtered.map(
+          (farmer) => `
+
+            <tr data-farmer-id="${farmer.id}">
+
+                <td data-label="Farmer ID">
+                    <strong>
+                        ${farmer.id}
+                    </strong>
+                </td>
+
+
+                <td data-label="Farmer Name">
+
+                    <strong>
+                        ${farmer.name}
+                    </strong>
+
+                </td>
+
+
+                <td data-label="Phone">
+                    ${farmer.phone}
+                </td>
+
+
+                <td data-label="State">
+                    ${farmer.state || '-'}
+                </td>
+
+
+                <td data-label="District">
+                    ${farmer.district || '-'}
+                </td>
+
+
+                <td data-label="Status">
+
+                    <span class="admin-status completed">
+                        Active
+                    </span>
+
+                </td>
+
+
+                <td data-label="Actions">
+
+                    <button
+                        class="admin-table-action farmer-details"
+                        type="button"
+                    >
+                        View Details
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `
+      ).join('');
+
+
+  bindFarmerActions();
+}
+
+
+/* ================= ACTIONS ================= */
+
+function bindFarmerActions() {
+
+  document
+      .querySelectorAll('.farmer-details')
+      .forEach((button) => {
+
+        button.addEventListener(
+            'click',
+            () => {
+
+              const row =
+                  button.closest('tr');
+
+              const farmerId =
+                  Number(
+                      row.dataset.farmerId
+                  );
+
+
+              const farmer =
+                  farmers.find(
+                      (item) =>
+                          item.id ===
+                          farmerId
+                  );
+
+
+              if (!farmer) {
+                return;
+              }
+
+
+              showFarmerToast(
+                  `${farmer.name} · ${farmer.phone} · ${farmer.district || 'District not available'}`
+              );
+
+            }
+        );
+
+      });
+
+}
+
+
+/* ================= SEARCH ================= */
+
+farmerSearch?.addEventListener(
+    'input',
+    renderFarmers
+);
+
+
+/* ================= START ================= */
+
+loadFarmers();

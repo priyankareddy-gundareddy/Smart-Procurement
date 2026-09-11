@@ -1,7 +1,7 @@
 const slotData = [
   { label: '09:00 AM', status: 'Available', available: true },
   { label: '10:00 AM', status: 'Available', available: true },
-  { label: '11:00 AM', status: 'Full', available: false },
+  { label: '11:00 AM', status: 'Available', available: true },
   { label: '12:00 PM', status: 'Available', available: true }
 ];
 
@@ -52,12 +52,6 @@ function formatReadableDate(dateString) {
   }).format(date);
 }
 
-function generateBookingId() {
-  const now = new Date();
-  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-  const code = String(Math.floor(Math.random() * 900) + 100);
-  return `SP${stamp}${code}`;
-}
 
 function setValidation(message, isError = true) {
   if (!validationBox) return;
@@ -115,21 +109,69 @@ function setDateDefault() {
   bookingSelection.date = isoDate;
 }
 
-function renderTimeSlots() {
+async function renderTimeSlots() {
   if (!slotGrid) return;
 
+  const centreName = bookingCenterInput?.value;
+  const date = bookingDateInput?.value;
+
+  // If centre or date is not selected, show all slots as available
+  if (!centreName || !date) {
+    slotData.forEach(slot => {
+      slot.available = true;
+      slot.status = 'Available';
+    });
+  } else {
+
+    const centreIds = {
+      'Vijayawada Procurement Center': 3,
+      'Guntur Procurement Center': 1,
+      'Tenali Procurement Center': 2
+    };
+
+    const centreId = centreIds[centreName];
+
+    if (centreId) {
+      try {
+        const response = await fetch(
+            `http://localhost:8080/api/bookings/centre/${centreId}/date/${date}`
+        );
+
+        if (response.ok) {
+          const bookings = await response.json();
+
+          slotData.forEach(slot => {
+            const alreadyBooked = bookings.some(
+                booking => booking.slotTime === slot.label
+            );
+
+            slot.available = !alreadyBooked;
+            slot.status = alreadyBooked ? 'Full' : 'Available';
+          });
+        }
+      } catch (error) {
+        console.error('Could not load booked slots:', error);
+      }
+    }
+  }
+
   slotGrid.innerHTML = '';
+
   slotData.forEach((slot) => {
     const card = document.createElement('button');
+
     card.type = 'button';
     card.className = 'slot-card';
     card.disabled = !slot.available;
+
     card.innerHTML = `
       <span class="slot-time">${slot.label}</span>
-      <span class="slot-status ${slot.available ? 'available' : 'full'}">${slot.status}</span>
+      <span class="slot-status ${slot.available ? 'available' : 'full'}">
+        ${slot.status}
+      </span>
     `;
 
-    if (selectedBookingSlot === slot.label) {
+    if (selectedBookingSlot === slot.label && slot.available) {
       card.classList.add('selected');
     }
 
@@ -186,15 +228,20 @@ function saveBookingToHistory(booking) {
 if (bookingCenterInput) {
   bookingCenterInput.addEventListener('change', () => {
     bookingSelection.center = bookingCenterInput.value;
+    selectedBookingSlot = null;
+    bookingSelection.time = '';
+    renderTimeSlots();
   });
 }
 
 if (bookingDateInput) {
   bookingDateInput.addEventListener('change', () => {
     bookingSelection.date = bookingDateInput.value;
+    selectedBookingSlot = null;
+    bookingSelection.time = '';
+    renderTimeSlots();
   });
 }
-
 document.getElementById('back-to-dashboard')?.addEventListener('click', () => {
   window.location.href = 'index.html#farmer-dashboard';
 });
@@ -228,39 +275,105 @@ document.getElementById('continue-booking')?.addEventListener('click', () => {
 document.getElementById('back-to-step-1')?.addEventListener('click', () => showScreen(bookingStep1));
 document.getElementById('confirm-back')?.addEventListener('click', () => showScreen(bookingStep1));
 
-document.getElementById('confirm-booking')?.addEventListener('click', () => {
-  const bookingId = generateBookingId();
-  let currentFarmer = null;
-  try {
-    currentFarmer = JSON.parse(sessionStorage.getItem('smartProcureCurrentFarmer') || 'null');
-  } catch (error) {
-    currentFarmer = null;
-  }
-  const booking = {
-    token: bookingId,
-    crop: bookingSelection.crop,
-    quantity: Number(bookingSelection.quantity),
-    center: bookingSelection.center,
-    date: bookingSelection.date,
-    time: selectedBookingSlot,
-    status: 'Confirmed',
-    farmer: 'Priyanka',
-    mobile: 'XXXXXXXXXX',
-    farmerMobile: currentFarmer?.mobile || ''
-  };
+// BACKEND BOOKING
 
-  saveBookingToHistory(booking);
+const confirmBookingButton = document.getElementById('confirm-booking');
 
-  if (successBookingId) successBookingId.textContent = bookingId;
-  if (successCenter) successCenter.textContent = window.farmerI18n?.getCenterName(bookingSelection.center) || bookingSelection.center;
-  if (successCrop) successCrop.textContent = bookingSelection.crop;
-  if (successQuantity) successQuantity.textContent = `${bookingSelection.quantity} kg`;
-  if (successDate) successDate.textContent = formatReadableDate(bookingSelection.date);
-  if (successTime) successTime.textContent = selectedBookingSlot || bookingSelection.time;
+if (confirmBookingButton) {
+  confirmBookingButton.addEventListener('click', async () => {
 
-  showScreen(bookingStep3);
-});
+    let farmer = null;
 
+    try {
+      farmer = JSON.parse(
+          sessionStorage.getItem('smartProcureCurrentFarmer') ||
+          localStorage.getItem('smartProcureCurrentFarmer') ||
+          'null'
+      );
+    } catch (error) {
+      farmer = null;
+    }
+    if (!farmer || !farmer.id) {
+      alert('Please login again.');
+      return;
+    }
+
+    // Convert center name to database center ID
+    const centreIds = {
+      'Vijayawada Procurement Center': 3,
+      'Guntur Procurement Center': 1,
+      'Tenali Procurement Center': 2
+    };
+
+    const centreId = centreIds[bookingSelection.center];
+
+    if (!centreId) {
+      alert('Invalid procurement center.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8080/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          farmerId: farmer.id,
+          centreId: centreId,
+          cropName: bookingSelection.crop,
+          quantity: Number(bookingSelection.quantity),
+          bookingDate: bookingSelection.date,
+          slotTime: bookingSelection.time
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Booking failed:', errorText);
+        alert('Booking failed. Please try again.');
+        return;
+      }
+
+      const booking = await response.json();
+
+      console.log('Booking created successfully:', booking);
+
+      // Show REAL database booking ID
+      if (successBookingId) {
+        successBookingId.textContent = booking.id;
+      }
+
+      if (successCenter) {
+        successCenter.textContent = bookingSelection.center;
+      }
+
+      if (successCrop) {
+        successCrop.textContent = bookingSelection.crop;
+      }
+
+      if (successQuantity) {
+        successQuantity.textContent =
+            `${bookingSelection.quantity} kg`;
+      }
+
+      if (successDate) {
+        successDate.textContent =
+            formatReadableDate(bookingSelection.date);
+      }
+
+      if (successTime) {
+        successTime.textContent = bookingSelection.time;
+      }
+
+      showScreen(bookingStep3);
+
+    } catch (error) {
+      console.error('Backend connection error:', error);
+      alert('Cannot connect to backend. Make sure Spring Boot is running.');
+    }
+  });
+}
 document.getElementById('view-bookings')?.addEventListener('click', () => {
   window.location.href = 'my-bookings.html';
 });
@@ -274,11 +387,19 @@ document.getElementById('success-dashboard')?.addEventListener('click', () => {
 });
 
 if (bookingCenterInput) {
-  bookingCenterInput.value = 'Vijayawada Procurement Center';
-  bookingSelection.center = bookingCenterInput.value;
+  const selectedCenter = sessionStorage.getItem('smartProcureSelectedCenter');
+
+  if (selectedCenter) {
+    bookingCenterInput.value = selectedCenter;
+    bookingSelection.center = selectedCenter;
+    sessionStorage.removeItem('smartProcureSelectedCenter');
+  } else {
+    bookingCenterInput.value = 'Vijayawada Procurement Center';
+    bookingSelection.center = bookingCenterInput.value;
+  }
+
   loadBookingCenters();
 }
-
 setDateDefault();
 renderTimeSlots();
 showScreen(bookingStep1);

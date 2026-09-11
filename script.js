@@ -40,12 +40,7 @@ document.querySelectorAll('[data-detail="notifications-detail"]').forEach((link)
 });
 
 const dashboardViewIds = ['farmer-dashboard', 'dashboard-centers', 'token-detail', 'status-detail', 'notifications-detail', 'profile-detail'];
-const notificationState = [
-	{ icon: '🔵', type: 'Booking', title: 'Slot Confirmed', message: 'Your procurement slot has been confirmed.', date: '10 September 2026 · 10:00 AM', unread: true },
-	{ icon: '🟢', type: 'Center Availability', title: 'Center Available', message: 'Vijayawada Procurement Center currently has 15 available slots.', date: 'Today · 9:15 AM', unread: true },
-	{ icon: '🟡', type: 'Reminder', title: 'Procurement Reminder', message: 'Your procurement appointment is tomorrow at 10:00 AM.', date: '9 September 2026 · 8:00 AM', unread: true },
-	{ icon: '✓', type: 'Procurement', title: 'Procurement Completed', message: 'Your Rice procurement has been completed successfully.', date: '8 September 2026 · 4:30 PM', unread: false }
-];
+let notificationState = [];
 let procurementCenters = [
 	{ name: 'Vijayawada Procurement Center', distance: 2.4, status: 'open', statusLabel: 'Open', waiting: 'low', waitingLabel: 'Low', waitDuration: '20 min', slots: 24, hours: '9:00 AM – 5:00 PM' },
 	{ name: 'Gannavaram Procurement Center', distance: 5.1, status: 'almost', statusLabel: 'Almost Full', waiting: 'medium', waitingLabel: 'Medium', waitDuration: '45 min', slots: 8, hours: '8:30 AM – 4:30 PM' },
@@ -83,7 +78,13 @@ function farmerDuration(value) {
 
 function normalizeCenter(center) {
 	const status = String(center.status || 'open').toLowerCase();
-	const statusMap = { open: ['open', 'Open'], available: ['open', 'Available'], almost: ['almost', 'Almost Full'], almost_full: ['almost', 'Almost Full'], closed: ['closed', 'Closed'] };
+	const statusMap = {
+		open: ['open', 'Open'],
+		available: ['open', 'Available'],
+		almost: ['almost', 'Almost Full'],
+		almost_full: ['almost', 'Almost Full'],
+		closed: ['closed', 'Closed']
+	};
 	const [statusKey, statusLabel] = statusMap[status] || ['open', 'Open'];
 	const distance = Number(center.distanceKm ?? center.distance ?? 0);
 	return {
@@ -95,10 +96,14 @@ function normalizeCenter(center) {
 		waitingLabel: center.waitingLabel || 'Low',
 		waitDuration: center.waitDuration || 'Not available',
 		slots: Number(center.availableSlots ?? center.slots ?? 0),
-		hours: center.hours || center.operatingHours || 'Hours not available'
+
+		hours: center.hours ||
+			center.operatingHours ||
+			(center.openingTime && center.closingTime
+				? `${center.openingTime} – ${center.closingTime}`
+				: 'Hours not available')
 	};
 }
-
 async function loadNearbyCenters(root) {
 	if (!navigator.geolocation) {
 		showCenterMessage(root, farmerText('center.locationUnsupported', 'Location is not supported by this browser. Showing demo centers.'));
@@ -109,8 +114,7 @@ async function loadNearbyCenters(root) {
 		const { latitude, longitude } = position.coords;
 		try {
 			const params = new URLSearchParams({ latitude: String(latitude), longitude: String(longitude) });
-			const response = await fetch(`/api/procurement-centers?${params}`);
-			if (!response.ok) throw new Error(`Centers API returned ${response.status}`);
+			const response = await fetch(`http://localhost:8080/api/centres/nearby?${params}`);			if (!response.ok) throw new Error(`Centers API returned ${response.status}`);
 			const payload = await response.json();
 			const centers = Array.isArray(payload) ? payload : payload.centers;
 			if (!Array.isArray(centers)) throw new Error('Invalid centers response');
@@ -153,16 +157,17 @@ function renderCenterCards(root = document) {
 		toast.classList.add('show');
 		window.setTimeout(() => toast.classList.remove('show'), 3200);
 	}));
-	results.querySelectorAll('[data-center-action="book"]:not([disabled])').forEach((button) => button.addEventListener('click', () => {
-		if (!hasBookableProcurementSlot()) {
-			toast.textContent = 'No active procurement slots are available. Please try again later.';
-			toast.classList.add('show');
-			window.setTimeout(() => toast.classList.remove('show'), 3200);
-			return;
-		}
-		if (sessionStorage.getItem('smartProcureLoggedIn')) showDetail('token-detail');
-		else showDetail('login-detail');
-	}));
+	results.querySelectorAll('[data-center-action="book"]:not([disabled])').forEach((button) => {
+		button.addEventListener('click', () => {
+
+			if (!sessionStorage.getItem('smartProcureLoggedIn')) {
+				showDetail('login-detail');
+				return;
+			}
+
+			window.location.href = 'booking.html';
+		});
+	});
 }
 
 function setupCentersPage(root = document) {
@@ -246,14 +251,167 @@ function renderDashboardView(viewId) {
 	const view = views[viewId];
 	if (!view) return;
 	panel.innerHTML = `<span class="section-kicker">Farmer dashboard</span><h2>${view[0]}</h2><p class="dashboard-subview-lede">${view[1]}</p>${view[2]}`;
-	if (viewId === 'notifications-detail') setupNotifications(panel);
+	if (viewId === 'notifications-detail') {
+		loadBackendNotifications().then(() => {
+			panel.innerHTML = `<span class="section-kicker">Farmer dashboard</span><h2>${view[0]}</h2><p class="dashboard-subview-lede">${view[1]}</p>${getNotificationsMarkup()}`;
+			setupNotifications(panel);
+		});
+	}
+		if (viewId === 'status-detail') {
+		loadBackendProcurementStatus(panel);
+	}
 	panel.querySelectorAll('.dashboard-demo-button').forEach((button) => button.addEventListener('click', () => {
 		toast.textContent = 'This is demo data. This action will connect to the backend later.';
 		toast.classList.add('show');
 		window.setTimeout(() => toast.classList.remove('show'), 3200);
 	}));
 }
+async function loadBackendProcurementStatus(panel) {
 
+	const statusContainer =
+		panel.querySelector('#backend-procurement-status');
+
+	if (!statusContainer) return;
+
+	const farmer = getCurrentFarmer();
+
+	if (!farmer || !farmer.id) {
+		statusContainer.innerHTML = `
+            <div class="empty-status-board">
+                <strong>Please login</strong>
+                <span>Please login to view your procurement status.</span>
+            </div>
+        `;
+		return;
+	}
+
+	try {
+
+		const response = await fetch(
+			`http://localhost:8080/api/bookings/farmer/${farmer.id}`
+		);
+
+		if (!response.ok) {
+			throw new Error('Failed to fetch bookings');
+		}
+
+		const bookings = await response.json();
+
+		console.log("PROCUREMENT STATUS FROM BACKEND:", bookings);
+
+		if (!bookings.length) {
+			statusContainer.innerHTML = `
+                <div class="empty-status-board">
+                    <strong>No procurement bookings yet.</strong>
+                    <span>Confirmed bookings will appear here.</span>
+                </div>
+            `;
+			return;
+		}
+
+		statusContainer.innerHTML = `
+            <div class="procurement-status-board">
+
+                ${bookings.map((booking) => `
+
+                    <div class="procurement-status-page">
+
+                        <div class="procurement-details-card">
+
+                            <div class="procurement-detail">
+                                <small>Booking / Token</small>
+                                <strong>
+                                    #${booking.id} / ${booking.tokenNumber}
+                                </strong>
+                            </div>
+
+                            <div class="procurement-detail">
+                                <small>Crop</small>
+                                <strong>
+                                    ${booking.cropName}
+                                </strong>
+                            </div>
+
+                            <div class="procurement-detail">
+                                <small>Quantity</small>
+                                <strong>
+                                    ${booking.quantity} kg
+                                </strong>
+                            </div>
+
+                            <div class="procurement-detail">
+                                <small>Booking Date</small>
+                                <strong>
+                                    ${formatStatusDate(booking.bookingDate)}
+                                </strong>
+                            </div>
+
+                            <div class="procurement-detail">
+                                <small>Slot Time</small>
+                                <strong>
+                                    ${formatStatusTime(booking.slotTime)}
+                                </strong>
+                            </div>
+
+                            <div class="procurement-detail">
+                                <small>Status</small>
+                                <strong>
+                                    ${booking.status}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <div class="procurement-timeline">
+
+                            <div class="status-timeline-step complete">
+                                <span>✓</span>
+                                <div>
+                                    <strong>Request Submitted</strong>
+                                    <small>Completed</small>
+                                </div>
+                            </div>
+
+                            <div class="status-timeline-step complete">
+                                <span>✓</span>
+                                <div>
+                                    <strong>Slot Confirmed</strong>
+                                    <small>Completed</small>
+                                </div>
+                            </div>
+
+                            <div class="status-timeline-step current">
+                                <span>●</span>
+                                <div>
+                                    <strong>${booking.status}</strong>
+                                    <small>Current status</small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `).join('')}
+
+            </div>
+        `;
+
+	} catch (error) {
+
+		console.error(
+			"Could not load procurement status:",
+			error
+		);
+
+		statusContainer.innerHTML = `
+            <div class="empty-status-board">
+                <strong>Unable to load procurement status.</strong>
+                <span>Make sure Spring Boot is running on port 8080.</span>
+            </div>
+        `;
+	}
+}
 function getCurrentFarmer() {
 	try {
 		return JSON.parse(sessionStorage.getItem('smartProcureCurrentFarmer') || 'null');
@@ -318,11 +476,14 @@ function getProcurementStatusMarkup() {
 	};
 	return `<div class="procurement-status-page"><div class="procurement-details-card"><div class="procurement-detail"><small>Booking / Token</small><strong>${details.token}</strong></div><div class="procurement-detail"><small>Crop</small><strong>${details.crop}</strong></div><div class="procurement-detail"><small>Quantity</small><strong>${details.quantity}</strong></div><div class="procurement-detail"><small>Procurement Center</small><strong>${details.center}</strong></div><div class="procurement-detail"><small>Booking Date</small><strong>${details.date}</strong></div><div class="procurement-detail"><small>Slot Time</small><strong>${details.time}</strong></div></div><div class="procurement-timeline" aria-label="Procurement status timeline"><div class="status-timeline-step complete"><span>✓</span><div><strong>Request Submitted</strong><small>Completed</small></div></div><div class="status-timeline-step complete"><span>✓</span><div><strong>Slot Confirmed</strong><small>Completed</small></div></div><div class="status-timeline-step current"><span>●</span><div><strong>Waiting for Procurement</strong><small>Current status</small></div></div><div class="status-timeline-step pending"><span>○</span><div><strong>Procurement Completed</strong><small>Pending</small></div></div></div><button class="button button-dark dashboard-action procurement-back-button" type="button" data-dashboard-action="back-dashboard">Back to Dashboard</button></div>`;
 }
-
 function getAllProcurementStatusMarkup() {
-	const bookings = getStatusBookings();
-	if (!bookings.length) return '<div class="empty-status-board"><strong>No procurement bookings yet.</strong><span>Confirmed bookings will appear here.</span></div>';
-	return `<div class="procurement-status-board">${bookings.map((booking) => getProcurementStatusCardMarkup(booking)).join('')}</div>`;
+	return `
+        <div id="backend-procurement-status">
+            <div class="empty-status-board">
+                <strong>Loading procurement status...</strong>
+            </div>
+        </div>
+    `;
 }
 
 function getAllBookingsMarkup() {
@@ -372,6 +533,45 @@ function updateNotificationBell() {
 	if (!bell) return;
 	bell.innerHTML = `🔔<i${unreadCount === 0 ? ' hidden' : ''}>${unreadCount}</i>`;
 }
+	async function loadBackendNotifications() {
+		const farmer = getCurrentFarmer();
+
+		if (!farmer?.id) {
+			notificationState = [];
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				`http://localhost:8080/api/notifications/farmer/${farmer.id}`
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to load notifications');
+			}
+
+			const data = await response.json();
+
+			notificationState = data.map((notification) => ({
+				id: notification.id,
+				icon: '🔔',
+				type: notification.type,
+				title: notification.type === 'BOOKING'
+					? 'Booking Confirmed'
+					: notification.type === 'STATUS_UPDATE'
+						? 'Booking Status Updated'
+						: 'Procurement Reminder',
+				message: notification.message,
+				date: notification.createdAt,
+				unread: !notification.isRead
+			}));
+
+		} catch (error) {
+			console.error('Error loading notifications:', error);
+			notificationState = [];
+		}
+	}
+
 
 function setupNotifications(panel) {
 	updateNotificationBell();
@@ -549,25 +749,139 @@ function findMatchingAccount(mobile, password) {
 	return accounts.find((account) => normalizeMobile(account.mobile) === mobile && String(account.password) === String(password)) || null;
 }
 
+
 if (loginForm) {
-	loginForm.addEventListener('submit', (event) => {
+	loginForm.addEventListener('submit', async (event) => {
+
 		event.preventDefault();
-		const mobile = normalizeMobile(loginForm.querySelector('#mobile').value);
-		const password = loginForm.querySelector('#password').value;
-		const farmer = findMatchingAccount(mobile, password);
-		if (farmer) {
-			sessionStorage.setItem('smartProcureLoggedIn', 'true');
-			sessionStorage.setItem('smartProcureCurrentFarmer', JSON.stringify(farmer));
-			updateDashboardProfileBadge(farmer);
-			toast.textContent = `${farmerText('messages.loginSuccess', 'Login successful. Welcome back.')} ${farmer.fullName}.`;
-			showDetail('farmer-dashboard');
-		} else if (!getStoredAccounts().length) {
-			toast.textContent = farmerText('login.noAccountFound', 'No account found. Please register first.');
-		} else {
-			toast.textContent = farmerText('login.invalid', 'The mobile number or password does not match your account.');
+
+		const mobile = normalizeMobile(
+			loginForm.querySelector('#mobile').value
+		);
+
+		const password =
+			loginForm.querySelector('#password').value;
+
+		// Check empty fields
+		if (!mobile || !password) {
+			toast.textContent =
+				'Please enter mobile number and password.';
+
+			toast.classList.add('show');
+
+			window.setTimeout(() => {
+				toast.classList.remove('show');
+			}, 3200);
+
+			return;
 		}
-		toast.classList.add('show');
-		window.setTimeout(() => toast.classList.remove('show'), 3200);
+
+		try {
+
+			// Send login request to Spring Boot backend
+			const response = await fetch(
+				'http://localhost:8080/api/farmers/login',
+				{
+					method: 'POST',
+
+					headers: {
+						'Content-Type': 'application/json'
+					},
+
+					body: JSON.stringify({
+						phone: mobile,
+						password: password
+					})
+				}
+			);
+
+			// Wrong phone/password
+			if (!response.ok) {
+
+				toast.textContent =
+					'Invalid mobile number or password.';
+
+				toast.classList.add('show');
+
+				window.setTimeout(() => {
+					toast.classList.remove('show');
+				}, 3200);
+
+				return;
+			}
+
+			// Get farmer returned by backend
+			const farmer = await response.json();
+
+			// Make sure backend returned a farmer
+			if (!farmer || !farmer.id) {
+
+				toast.textContent =
+					'Invalid mobile number or password.';
+
+				toast.classList.add('show');
+
+				window.setTimeout(() => {
+					toast.classList.remove('show');
+				}, 3200);
+
+				return;
+			}
+
+			// Convert backend farmer data
+			// into the format used by the frontend
+			const frontendFarmer = {
+				id: farmer.id,
+				fullName: farmer.name,
+				mobile: farmer.phone,
+				email: farmer.email,
+				village: farmer.village,
+				district: farmer.district,
+				state: 'Andhra Pradesh'
+			};
+
+			// Save logged-in farmer
+			sessionStorage.setItem(
+				'smartProcureLoggedIn',
+				'true'
+			);
+
+			sessionStorage.setItem(
+				'smartProcureCurrentFarmer',
+				JSON.stringify(frontendFarmer)
+			);
+			localStorage.setItem(
+				'smartProcureCurrentFarmer',
+				JSON.stringify(frontendFarmer)
+			);
+
+			updateDashboardProfileBadge(frontendFarmer);
+
+			toast.textContent =
+				`Login successful. Welcome ${frontendFarmer.fullName}.`;
+
+			toast.classList.add('show');
+
+			// Open farmer dashboard
+			showDetail('farmer-dashboard');
+
+			window.setTimeout(() => {
+				toast.classList.remove('show');
+			}, 3200);
+
+		} catch (error) {
+
+			console.error('Login error:', error);
+
+			toast.textContent =
+				'Cannot connect to backend. Please make sure Spring Boot is running.';
+
+			toast.classList.add('show');
+
+			window.setTimeout(() => {
+				toast.classList.remove('show');
+			}, 3200);
+		}
 	});
 }
 
@@ -600,39 +914,181 @@ if (stateSelect && districtSelect) {
 }
 
 if (registrationForm) {
-	registrationForm.addEventListener('submit', (event) => {
+	registrationForm.addEventListener('submit', async (event) => {
+
 		event.preventDefault();
-		const values = Object.fromEntries(new FormData(registrationForm).entries());
+
+		const values = Object.fromEntries(
+			new FormData(registrationForm).entries()
+		);
+
 		const errors = {};
-		if (!values.fullName.trim()) errors['full-name'] = 'Enter your full name.';
-		if (!/^\d{10}$/.test(values.mobile)) errors['registration-mobile'] = 'Enter a valid 10-digit mobile number.';
-		if (values.password.length < 6) errors['registration-password'] = 'Use at least 6 characters.';
-		if (!values.confirmPassword) errors['confirm-password'] = 'Confirm your password.';
-		else if (values.password !== values.confirmPassword) errors['confirm-password'] = 'Passwords do not match.';
-		if (!values.state) errors.state = 'Select your state.';
-		if (!values.district) errors.district = 'Select your district.';
-		registrationForm.querySelectorAll('.field-error').forEach((error) => { error.textContent = errors[error.dataset.errorFor] || ''; });
-		registrationForm.querySelectorAll('input, select').forEach((field) => field.classList.toggle('invalid', Boolean(errors[field.id])));
-		const success = document.getElementById('registration-success');
+
+		// -----------------------------
+		// FRONTEND VALIDATION
+		// -----------------------------
+
+		if (!values.fullName || !values.fullName.trim()) {
+			errors['full-name'] = 'Enter your full name.';
+		}
+
+		if (!/^\d{10}$/.test(values.mobile || '')) {
+			errors['registration-mobile'] =
+				'Enter a valid 10-digit mobile number.';
+		}
+
+		if (!values.password || values.password.length < 6) {
+			errors['registration-password'] =
+				'Use at least 6 characters.';
+		}
+
+		if (!values.confirmPassword) {
+			errors['confirm-password'] =
+				'Confirm your password.';
+		} else if (values.password !== values.confirmPassword) {
+			errors['confirm-password'] =
+				'Passwords do not match.';
+		}
+
+		if (!values.state) {
+			errors.state = 'Select your state.';
+		}
+
+		if (!values.district) {
+			errors.district = 'Select your district.';
+		}
+
+		// Show validation errors
+		registrationForm
+			.querySelectorAll('.field-error')
+			.forEach((error) => {
+				error.textContent =
+					errors[error.dataset.errorFor] || '';
+			});
+
+		registrationForm
+			.querySelectorAll('input, select')
+			.forEach((field) => {
+				field.classList.toggle(
+					'invalid',
+					Boolean(errors[field.id])
+				);
+			});
+
+		const success =
+			document.getElementById('registration-success');
+
+		// Stop if validation failed
 		if (Object.keys(errors).length) {
 			success.textContent = '';
 			return;
 		}
-		const normalizedMobile = normalizeMobile(values.mobile);
-		const storedAccounts = getStoredAccounts();
-		const hasExistingAccount = storedAccounts.some((account) => normalizeMobile(account.mobile) === normalizedMobile);
-		if (hasExistingAccount) {
-			success.textContent = 'This mobile number is already registered. Please login.';
-			return;
+
+		// -----------------------------
+		// NORMALIZE MOBILE
+		// -----------------------------
+
+		const normalizedMobile =
+			normalizeMobile(values.mobile);
+
+		// -----------------------------
+		// SEND REGISTRATION TO BACKEND
+		// -----------------------------
+
+		try {
+
+			const response = await fetch(
+				'http://localhost:8080/api/farmers/register',
+				{
+					method: 'POST',
+
+					headers: {
+						'Content-Type': 'application/json'
+					},
+
+					body: JSON.stringify({
+						name: values.fullName,
+						phone: normalizedMobile,
+						password: values.password,
+						state: values.state,
+						district: values.district
+					})
+				}
+			);
+
+			// Backend returned an error
+			if (!response.ok) {
+
+				const errorText =
+					await response.text();
+
+				console.error(
+					'Registration failed:',
+					errorText
+				);
+
+				success.textContent =
+					'Registration failed. Please try again.';
+
+				return;
+			}
+
+			// Get farmer returned from backend
+			const farmer =
+				await response.json();
+
+			// -----------------------------
+			// SAVE LOGGED-IN FRONTEND DATA
+			// -----------------------------
+
+			const frontendFarmer = {
+				id: farmer.id,
+				fullName: farmer.name,
+				mobile: farmer.phone,
+				email: farmer.email,
+				village: farmer.village,
+				district: farmer.district,
+
+				// State is currently handled by frontend.
+				state: values.state
+			};
+
+			sessionStorage.setItem(
+				'smartProcureCurrentFarmer',
+				JSON.stringify(frontendFarmer)
+			);
+
+			// -----------------------------
+			// SUCCESS MESSAGE
+			// -----------------------------
+
+			success.textContent =
+				'Registration successful! You can now login.';
+
+			// Clear form
+			registrationForm.reset();
+
+			districtSelect.innerHTML =
+				'<option value="">Select a state first</option>';
+
+			districtSelect.disabled = true;
+
+			registrationForm
+				.querySelectorAll('input, select')
+				.forEach((field) => {
+					field.classList.remove('invalid');
+				});
+
+		} catch (error) {
+
+			console.error(
+				'Registration error:',
+				error
+			);
+
+			success.textContent =
+				'Cannot connect to backend. Please make sure Spring Boot is running.';
 		}
-		values.mobile = normalizedMobile;
-		const updatedAccounts = [...storedAccounts, values];
-		saveStoredAccounts(updatedAccounts);
-		success.textContent = 'Registration successful! You can now login.';
-		registrationForm.reset();
-		districtSelect.innerHTML = '<option value="">Select a state first</option>';
-		districtSelect.disabled = true;
-		registrationForm.querySelectorAll('input, select').forEach((field) => field.classList.remove('invalid'));
 	});
 }
 
@@ -698,3 +1154,294 @@ dashboardLogout?.addEventListener('click', () => {
 });
 
 updateNotificationBell();
+// =====================================================
+// STRINGFY
+// =====================================================
+
+/* ================= LOAD PROCUREMENT CENTRES ================= */
+
+async function loadBookingCentres() {
+
+	const centreSelect =
+		document.getElementById('booking-center');
+
+	if (!centreSelect) {
+		return;
+	}
+
+	// Get logged-in farmer
+	const farmer = getCurrentFarmer();
+
+	if (!farmer || !farmer.district) {
+		centreSelect.innerHTML = `
+            <option value="">
+                Please login first
+            </option>
+        `;
+		return;
+	}
+
+	try {
+
+		// Get centres based on farmer's district
+		const response = await fetch(
+			'http://localhost:8080/api/centres/district/' + farmer.district
+		);
+		if (!response.ok) {
+			throw new Error('Failed to load centres');
+		}
+
+		const centres =
+			await response.json();
+
+		centreSelect.innerHTML = `
+            <option value="">
+                Choose procurement centre
+            </option>
+        `;
+
+		if (centres.length === 0) {
+			centreSelect.innerHTML = `
+                <option value="">
+                    No procurement centres available
+                </option>
+            `;
+			return;
+		}
+
+		centres.forEach((centre) => {
+
+			const option =
+				document.createElement('option');
+
+			option.value = centre.id;
+
+			if (centre.isActive === true) {
+
+				option.textContent =
+					`${centre.name} - Active`;
+
+			} else {
+
+				option.textContent =
+					`${centre.name} - Inactive`;
+
+				option.disabled = true;
+			}
+
+			centreSelect.appendChild(option);
+		});
+
+	} catch (error) {
+
+		console.error(
+			'Error loading centres:',
+			error
+		);
+
+		centreSelect.innerHTML = `
+            <option value="">
+                Unable to load procurement centres
+            </option>
+        `;
+	}
+}
+loadBookingCentres();
+
+const continueBookingButton = document.getElementById('continue-booking');
+const confirmBookingButton = document.getElementById('confirm-booking');
+
+if (continueBookingButton) {
+
+	continueBookingButton.addEventListener('click', () => {
+
+		const crop = document.getElementById('booking-crop')?.value;
+		const quantity = document.getElementById('booking-quantity')?.value;
+
+		const centreSelect = document.getElementById('booking-center');
+		const centreId = Number(centreSelect?.value);
+		const centreName = centreSelect?.options[centreSelect.selectedIndex]?.text;
+
+		const date = document.getElementById('booking-date')?.value;
+		const validation = document.getElementById('booking-validation');
+
+		// Check farmer login
+		const farmer = getCurrentFarmer();
+
+		if (!farmer || !farmer.id) {
+			validation.textContent = 'Please login before booking a slot.';
+			return;
+		}
+
+		// Basic validation
+		if (!crop) {
+			validation.textContent = 'Please select a crop.';
+			return;
+		}
+
+		if (!quantity || Number(quantity) <= 0) {
+			validation.textContent = 'Please enter a valid quantity.';
+			return;
+		}
+
+		if (!centreId || !centreName) {
+			validation.textContent = 'Please select a procurement center.';
+			return;
+		}
+
+		if (!date) {
+			validation.textContent = 'Please select a date.';
+			return;
+		}
+
+		// Get selected time slot
+		const selectedSlot = document.querySelector(
+			'#slot-grid .selected'
+		);
+
+		if (!selectedSlot) {
+			validation.textContent = 'Please select a time slot.';
+			return;
+		}
+
+		const slotTime =
+			selectedSlot.dataset.time ||
+			selectedSlot.textContent.trim();
+
+		// Save temporary booking data
+		window.smartProcureBookingData = {
+			farmerId: farmer.id,
+			cropName: crop,
+			quantity: Number(quantity),
+			centreId: centreId,
+			centreName: centreName,
+			bookingDate: date,
+			slotTime: slotTime
+		};
+
+		// Show confirmation details
+		document.getElementById('confirm-crop').textContent = crop;
+		document.getElementById('confirm-quantity').textContent =
+			`${quantity} kg`;
+
+		document.getElementById('confirm-center').textContent =
+			centreName;
+		document.getElementById('confirm-date').textContent =
+			formatStatusDate(date);
+
+		document.getElementById('confirm-time').textContent =
+			slotTime;
+
+		document.getElementById('booking-step-1')?.classList.add('hidden');
+		document.getElementById('booking-step-2')?.classList.remove('hidden');
+	});
+}
+
+
+// =====================================================
+// CONFIRM BOOKING
+// =====================================================
+
+if (confirmBookingButton) {
+
+	confirmBookingButton.addEventListener('click', async () => {
+
+		const bookingData = window.smartProcureBookingData;
+
+		if (!bookingData) {
+			alert('Booking information is missing.');
+			return;
+		}
+
+		const farmer = getCurrentFarmer();
+
+		if (!farmer || !farmer.id) {
+			alert('Please login again.');
+			return;
+		}
+
+		try {
+
+			const response = await fetch(
+				'http://localhost:8080/api/bookings',
+				{
+					method: 'POST',
+
+					headers: {
+						'Content-Type': 'application/json'
+					},
+
+					body: JSON.stringify({
+						farmerId: farmer.id,
+						centreId: bookingData.centreId,
+						cropName: bookingData.cropName,
+						quantity: bookingData.quantity,
+						bookingDate: bookingData.bookingDate,
+						slotTime: bookingData.slotTime
+					})
+				}
+			);
+
+			if (!response.ok) {
+
+				const errorText = await response.text();
+
+				console.error(
+					'Booking failed:',
+					errorText
+				);
+
+				alert(
+					'Booking failed. Please try again.'
+				);
+
+				return;
+			}
+
+			const booking = await response.json();
+
+			console.log(
+				'Booking created successfully:',
+				booking
+			);
+
+
+			// =================================================
+			// SHOW SUCCESS PAGE
+			// =================================================
+
+			document.getElementById('success-booking-id').textContent =
+				booking.id;
+
+			document.getElementById('success-center').textContent =
+				bookingData.centreName;
+
+			document.getElementById('success-crop').textContent =
+				bookingData.cropName;
+
+			document.getElementById('success-quantity').textContent =
+				`${bookingData.quantity} kg`;
+
+			document.getElementById('success-date').textContent =
+				formatStatusDate(bookingData.bookingDate);
+
+			document.getElementById('success-time').textContent =
+				bookingData.slotTime;
+
+			document.getElementById('booking-step-2')?.classList.add('hidden');
+
+			document.getElementById('booking-step-3')?.classList.remove('hidden');
+
+		} catch (error) {
+
+			console.error(
+				'Booking connection error:',
+				error
+			);
+
+			alert(
+				'Cannot connect to backend. Make sure Spring Boot is running.'
+			);
+		}
+	});
+}

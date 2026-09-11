@@ -1,20 +1,188 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+  >
+
   <title>SmartProcure | Centers</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=admin-pages-1">
-</head>
-<body class="admin-body admin-protected-page">
-  <main class="admin-main admin-page-main">
-    <section class="admin-hero"><header class="admin-topbar"><a class="admin-hero-brand" href="admin-dashboard.html"><span class="admin-brand-mark">S</span><strong>Smart<span>Procure</span></strong></a><div class="admin-top-actions"><button class="admin-profile-button" type="button" aria-label="Admin profile"><span>AD</span></button><button class="admin-logout-button" type="button" data-admin-logout>Logout</button></div></header><div class="admin-welcome"><h1>Procurement Centers</h1><p>Manage locations, operating hours, and center availability.</p></div><nav class="admin-hero-nav" aria-label="Admin dashboard navigation"><a href="admin-dashboard.html">Dashboard</a><a href="admin-farmers.html">Farmers</a><a href="admin-bookings.html">Bookings</a><a href="admin-procurement.html">Procurement</a><a href="admin-payments.html">Payments</a><a class="active" href="admin-notifications.html">Notifications</a></nav></section>
-    <section class="admin-page-content"><div class="admin-section-heading"><div><span class="admin-eyebrow">Center management</span><h2>Active Procurement Centers</h2></div><button class="admin-outline-button" type="button" data-admin-demo>Add Center</button></div><div class="admin-management-grid"><article><span>âŒ–</span><h3>Vijayawada Center</h3><p>Open Â· 24 slots available<br>9:00 AM â€“ 5:00 PM</p><button type="button" data-admin-demo>Manage Center <b>â†’</b></button></article><article><span>âŒ–</span><h3>Gannavaram Center</h3><p>Almost full Â· 8 slots available<br>8:30 AM â€“ 4:30 PM</p><button type="button" data-admin-demo>Manage Center <b>â†’</b></button></article><article><span>âŒ–</span><h3>Center B</h3><p>Open Â· 15 slots available<br>9:00 AM â€“ 5:00 PM</p><button type="button" data-admin-demo>Manage Center <b>â†’</b></button></article></div></section>
-  </main>
-  <div class="admin-toast" role="status" aria-live="polite"></div><script src="admin-auth.js?v=admin-pages-1"></script><script src="translations/admin-en.js?v=admin-language-1"></script><script src="translations/admin-te.js?v=admin-language-1"></script><script src="js/admin-i18n.js?v=admin-language-1"></script>
-</body>
-</html>
 
+  <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css?v=admin-centers-2">
+
+</head>
+
+
+<body class="admin-body admin-protected-page">
+
+<main class="admin-main admin-page-main">
+
+
+  <!-- ================= HEADER ================= -->
+
+  <section class="admin-hero">
+
+    <header class="admin-topbar">
+
+      <a
+              class="admin-hero-brand"
+              href="admin-dashboard.html"
+      >
+
+                <span class="admin-brand-mark">
+                    S
+                </span>
+
+        <strong>
+          Smart<span>Procure</span>
+        </strong>
+
+      </a>
+
+
+      <div class="admin-top-actions">
+
+        <button
+                class="admin-profile-button"
+                type="button"
+                aria-label="Admin profile"
+        >
+          <span>AD</span>
+        </button>
+
+
+        <button
+                class="admin-logout-button"
+                type="button"
+                data-admin-logout
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <div class="admin-welcome">
+
+      <h1>
+        Procurement Centers
+      </h1>
+
+      <p>
+        Manage locations, operating hours,
+        and center availability.
+      </p>
+
+    </div>
+
+
+    <!-- ================= NAVIGATION ================= -->
+
+    <nav
+            class="admin-hero-nav"
+            aria-label="Admin dashboard navigation"
+    >
+
+      <a href="admin-dashboard.html">
+        Dashboard
+      </a>
+
+      <a href="admin-farmers.html">
+        Farmers
+      </a>
+
+      <a href="admin-bookings.html">
+        Bookings
+      </a>
+
+      <a href="admin-procurement.html">
+        Procurement
+      </a>
+
+      <a href="admin-payments.html">
+        Payments
+      </a>
+
+      <a href="admin-notifications.html">
+        Notifications
+      </a>
+
+    </nav>
+
+  </section>
+
+
+  <!-- ================= CONTENT ================= -->
+
+  <section class="admin-page-content">
+
+    <div class="admin-section-heading">
+
+      <div>
+
+                <span class="admin-eyebrow">
+                    Center management
+                </span>
+
+        <h2>
+          Procurement Centers
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= CENTRES ================= -->
+
+    <div class="admin-management-grid">
+
+      <p class="admin-empty-state">
+        Loading procurement centres...
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- ================= TOAST ================= -->
+
+<div
+        class="admin-toast"
+        role="status"
+        aria-live="polite"
+></div>
+
+
+<!-- ================= SCRIPTS ================= -->
+
+<script src="admin-auth.js?v=admin-pages-1"></script>
+
+<script src="admin-center.js"></script>
+
+<script src="translations/admin-en.js?v=admin-language-1"></script>
+
+<script src="translations/admin-te.js?v=admin-language-1"></script>
+
+<script src="js/admin-i18n.js?v=admin-language-1"></script>
+
+
+</body>
+
+</html>
