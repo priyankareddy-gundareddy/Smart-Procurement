@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SmartProcure | Farmers</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css?v=admin-farmers-2">
+
+</head>
+
+
+<body class="admin-body admin-protected-page">
+
+<main class="admin-main admin-page-main">
+
+
+  <!-- ================= HEADER ================= -->
+
+  <section class="admin-hero">
+
+    <header class="admin-topbar">
+
+      <a
+              class="admin-hero-brand"
+              href="admin-dashboard.html"
+      >
+
+                <span class="admin-brand-mark">
+                    S
+                </span>
+
+        <strong>
+          Smart<span>Procure</span>
+        </strong>
+
+      </a>
+
+
+      <div class="admin-top-actions">
+
+        <button
+                class="admin-profile-button"
+                type="button"
+                aria-label="Admin profile"
+        >
+          <span>AD</span>
+        </button>
+
+
+        <button
+                class="admin-logout-button"
+                type="button"
+                data-admin-logout
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <div class="admin-welcome">
+
+      <h1>
+        Farmers
+      </h1>
+
+      <p>
+        Review farmer accounts and registration activity.
+      </p>
+
+    </div>
+
+
+    <!-- ================= NAVIGATION ================= -->
+
+    <nav
+            class="admin-hero-nav"
+            aria-label="Admin dashboard navigation"
+    >
+
+      <a href="admin-dashboard.html">
+        Dashboard
+      </a>
+
+      <a
+              class="active"
+              href="admin-farmers.html"
+      >
+        Farmers
+      </a>
+
+      <a href="admin-bookings.html">
+        Bookings
+      </a>
+
+      <a href="admin-procurement.html">
+        Procurement
+      </a>
+
+      <a href="admin-payments.html">
+        Payments
+      </a>
+
+      <a href="admin-notifications.html">
+        Notifications
+      </a>
+
+    </nav>
+
+  </section>
+
+
+  <!-- ================= CONTENT ================= -->
+
+  <section class="admin-page-content">
+
+
+    <!-- ================= FARMER HEADING ================= -->
+
+    <div class="admin-section-heading">
+
+      <div>
+
+                <span class="admin-eyebrow">
+                    Farmer management
+                </span>
+
+        <h2>
+          Registered Farmers
+        </h2>
+
+      </div>
+
+
+      <div class="admin-page-actions">
+
+        <input
+                class="admin-search-input"
+                id="farmer-search"
+                type="search"
+                placeholder="Search by name or mobile"
+                aria-label="Search farmers by name or mobile"
+        >
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= FARMER TABLE ================= -->
+
+    <div class="admin-table-wrap">
+
+      <table
+              class="admin-requests-table"
+              id="farmers-table"
+      >
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Farmer ID
+          </th>
+
+          <th>
+            Farmer Name
+          </th>
+
+          <th>
+            Mobile Number
+          </th>
+
+          <th>
+            State
+          </th>
+
+          <th>
+            District
+          </th>
+
+          <th>
+            Account Status
+          </th>
+
+          <th>
+            Actions
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr>
+
+          <td colspan="7">
+            Loading farmers...
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+
+      <p
+              class="admin-empty-state"
+              id="farmer-empty-state"
+              hidden
+      >
+        No farmers match your search.
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- ================= TOAST ================= -->
+
+<div
+        class="admin-toast"
+        role="status"
+        aria-live="polite"
+></div>
+
+
+<!-- ================= SCRIPTS ================= -->
+
+<script src="admin-auth.js?v=admin-pages-1"></script>
+
+<script src="admin-farmers.js?v=admin-farmers-1"></script>
+
+<script src="translations/admin-en.js?v=admin-language-1"></script>
+
+<script src="translations/admin-te.js?v=admin-language-1"></script>
+
+<script src="js/admin-i18n.js?v=admin-language-1"></script>
+
+
+</body>
+
+</html>

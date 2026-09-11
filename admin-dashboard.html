@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SmartProcure Admin Dashboard">
+
+  <title>SmartProcure | Admin Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css?v=admin-auth-1">
+</head>
+
+<body class="admin-body admin-protected-page">
+
+<div class="admin-shell">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="protected-admin-sidebar">
+
+    <a class="admin-brand" href="admin-dashboard.html">
+      <span class="admin-brand-mark">S</span>
+
+      <span>
+          Smart<span>Procure</span>
+          <small>Admin Console</small>
+        </span>
+    </a>
+
+    <div class="admin-user">
+      <span class="admin-user-avatar">A</span>
+
+      <div>
+        <strong>Admin</strong>
+        <small>System manager</small>
+      </div>
+    </div>
+
+    <nav class="admin-nav" aria-label="Admin navigation">
+
+      <a class="active" href="admin-dashboard.html">
+        ⌂ <span>Dashboard</span>
+      </a>
+
+      <a href="admin-farmers.html">
+        ♙ <span>Farmers</span>
+      </a>
+
+      <a href="admin-bookings.html">
+        ◷ <span>Bookings</span>
+      </a>
+
+      <a href="admin-procurement.html">
+        ▤ <span>Procurement</span>
+      </a>
+
+      <!-- Queue added -->
+      <a href="admin-requests.html">
+        ☷ <span>Queue</span>
+      </a>
+
+      <a href="admin-payments.html">
+        ₹ <span>Payments</span>
+      </a>
+
+      <a href="admin-notifications.html">
+        ♧ <span>Notifications</span>
+      </a>
+
+      <a href="#profile">
+        ⚙ <span>Profile</span>
+      </a>
+
+    </nav>
+
+    <button
+            class="admin-sidebar-logout"
+            type="button"
+            data-admin-logout>
+      ↪ <span>Logout</span>
+    </button>
+
+  </aside>
+
+
+  <!-- Main content -->
+  <main class="admin-main" id="dashboard">
+
+    <!-- Hero -->
+    <section
+            class="admin-hero"
+            aria-labelledby="admin-welcome-title">
+
+      <header class="admin-topbar">
+
+        <a
+                class="admin-hero-brand"
+                href="admin-dashboard.html"
+                aria-label="SmartProcure admin home">
+
+          <span class="admin-brand-mark">S</span>
+
+          <strong>
+            Smart<span>Procure</span>
+          </strong>
+
+        </a>
+
+        <div class="admin-top-actions">
+
+          <button
+                  class="admin-profile-button"
+                  type="button"
+                  aria-label="Admin profile">
+
+            <span>AD</span>
+
+          </button>
+
+          <button
+                  class="admin-logout-button"
+                  type="button"
+                  data-admin-logout>
+
+            Logout
+
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <div class="admin-welcome">
+
+        <h1 id="admin-welcome-title">
+          Welcome, <em>Admin</em> 👋
+        </h1>
+
+        <p>
+          Monitor and manage the SmartProcure procurement system.
+        </p>
+
+        <span class="admin-date">
+            THURSDAY, 10 SEPTEMBER 2026
+          </span>
+
+      </div>
+
+
+      <!-- Top navigation -->
+      <nav
+              class="admin-hero-nav"
+              aria-label="Admin dashboard navigation">
+
+        <a
+                class="active"
+                href="admin-dashboard.html">
+          Dashboard
+        </a>
+
+        <a href="admin-farmers.html">
+          Farmers
+        </a>
+
+        <a href="admin-bookings.html">
+          Bookings
+        </a>
+
+        <a href="admin-procurement.html">
+          Procurement
+        </a>
+
+        <!-- Queue added -->
+        <a href="admin-requests.html">
+          Queue
+        </a>
+
+        <a href="admin-slots.html">
+          Slots
+        </a>
+
+        <a href="admin-payments.html">
+          Payments
+        </a>
+
+        <a
+                class="notification-nav-link"
+                href="admin-notifications.html">
+
+          Notifications
+
+          <span
+                  class="notification-badge"
+                  aria-label="3 unread notifications">
+              3
+            </span>
+
+        </a>
+
+      </nav>
+
+    </section>
+
+
+    <!-- Summary cards -->
+    <section
+            class="admin-summary-grid admin-overview-metrics"
+            aria-label="System overview">
+
+      <article class="admin-summary-card admin-card-green">
+
+        <span>♙</span>
+
+        <div>
+          <small>Total Farmers</small>
+          <strong>1,250</strong>
+          <p>Registered in the system</p>
+        </div>
+
+      </article>
+
+
+      <article class="admin-summary-card admin-card-blue">
+
+        <span>▣</span>
+
+        <div>
+          <small>Total Procurement Bookings</small>
+          <strong>126</strong>
+          <p>All scheduled bookings</p>
+        </div>
+
+      </article>
+
+
+      <article class="admin-summary-card admin-card-yellow">
+
+        <span>◷</span>
+
+        <div>
+          <small>Pending Bookings</small>
+          <strong>18</strong>
+          <p>Awaiting approval</p>
+        </div>
+
+      </article>
+
+
+      <article class="admin-summary-card admin-card-coral">
+
+        <span>✓</span>
+
+        <div>
+          <small>Completed Procurements</small>
+          <strong>542</strong>
+          <p>Completed this month</p>
+        </div>
+
+      </article>
+
+
+      <article class="admin-summary-card admin-card-lilac">
+
+        <span>⌖</span>
+
+        <div>
+          <small>Available Procurement Slots</small>
+          <strong>48</strong>
+          <p>Across active centers</p>
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- Procurement overview -->
+    <section
+            class="admin-overview-grid"
+            aria-label="Procurement overview">
+
+      <article class="admin-panel">
+
+        <div class="admin-section-heading">
+
+          <div>
+
+              <span class="admin-eyebrow">
+                Recent activity
+              </span>
+
+            <h2>
+              Recent Bookings and Procurements
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <ul class="admin-activity-list">
+
+          <li>
+
+            <span>▣</span>
+
+            <div>
+
+              <strong>
+                Ravi Kumar booking created
+              </strong>
+
+              <small>
+                Rice · Vijayawada Center · 10:00 AM
+              </small>
+
+            </div>
+
+            <b class="admin-status pending">
+              Pending
+            </b>
+
+          </li>
+
+
+          <li>
+
+            <span>✓</span>
+
+            <div>
+
+              <strong>
+                Sita Devi procurement completed
+              </strong>
+
+              <small>
+                Wheat · 300 kg · Center B
+              </small>
+
+            </div>
+
+            <b class="admin-status completed">
+              Completed
+            </b>
+
+          </li>
+
+
+          <li>
+
+            <span>◷</span>
+
+            <div>
+
+              <strong>
+                New slot request received
+              </strong>
+
+              <small>
+                Anita Singh · Maize · Center C
+              </small>
+
+            </div>
+
+            <b class="admin-status confirmed">
+              Approved
+            </b>
+
+          </li>
+
+        </ul>
+
+      </article>
+
+
+      <article class="admin-panel">
+
+        <div class="admin-section-heading">
+
+          <div>
+
+              <span class="admin-eyebrow">
+                System status
+              </span>
+
+            <h2>
+              Procurement Status Overview
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="admin-status-overview">
+
+          <div>
+
+              <span>
+                <i class="admin-status-dot admin-status-dot-blue"></i>
+                Bookings
+              </span>
+
+            <strong>
+              126 total
+            </strong>
+
+          </div>
+
+
+          <div>
+
+              <span>
+                <i class="admin-status-dot admin-status-dot-yellow"></i>
+                Pending approval
+              </span>
+
+            <strong>
+              18 requests
+            </strong>
+
+          </div>
+
+
+          <div>
+
+              <span>
+                <i class="admin-status-dot admin-status-dot-green"></i>
+                Completed
+              </span>
+
+            <strong>
+              542 procurements
+            </strong>
+
+          </div>
+
+
+          <div>
+
+              <span>
+                <i class="admin-status-dot admin-status-dot-coral"></i>
+                Available slots
+              </span>
+
+            <strong>
+              48 slots
+            </strong>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- Toast -->
+<div
+        class="admin-toast"
+        role="status"
+        aria-live="polite">
+</div>
+
+
+<!-- Scripts -->
+<script src="admin-auth.js?v=admin-auth-4"></script>
+
+<script src="admin-notification-badge.js?v=admin-notifications-1"></script>
+
+<script src="translations/admin-en.js?v=admin-language-1"></script>
+
+<script src="translations/admin-te.js?v=admin-language-1"></script>
+
+<script src="js/admin-i18n.js?v=admin-language-5"></script>
+
+</body>
+</html>

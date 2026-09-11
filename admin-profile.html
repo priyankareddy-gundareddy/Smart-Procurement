@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProcure | Admin Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=admin-profile-1">
+</head>
+<body class="admin-body admin-protected-page">
+  <main class="admin-main admin-page-main">
+    <section class="admin-hero">
+      <header class="admin-topbar"><a class="admin-hero-brand" href="admin-dashboard.html"><span class="admin-brand-mark">S</span><strong>Smart<span>Procure</span></strong></a><div class="admin-top-actions"><button class="admin-logout-button" type="button" data-admin-logout>Logout</button></div></header>
+      <div class="admin-welcome"><h1>Admin Profile</h1><p>Manage your administrator account details.</p></div>
+      <nav class="admin-hero-nav" aria-label="Admin dashboard navigation"><a href="admin-dashboard.html">Dashboard</a><a href="admin-farmers.html">Farmers</a><a href="admin-bookings.html">Bookings</a><a href="admin-procurement.html">Procurement</a><a href="admin-slots.html">📅 Slots</a><a href="admin-payments.html">Payments</a><a href="admin-notifications.html">Notifications</a></nav>
+    </section>
+    <section class="admin-profile-layout">
+      <article class="admin-profile-card admin-panel"><div class="admin-profile-hero"><span class="admin-profile-large" id="profile-avatar">AD</span><div><h2 id="profile-heading">Admin</h2><p>Administrator</p></div></div><dl class="admin-details-list"><div><dt>Admin Name</dt><dd id="profile-name">-</dd></div><div><dt>Admin Email</dt><dd id="profile-email">-</dd></div><div><dt>Role</dt><dd>Administrator</dd></div><div><dt>Registered</dt><dd id="profile-registration-date">Not available</dd></div></dl><a class="admin-outline-button admin-back-dashboard" href="admin-dashboard.html">← Back to Dashboard</a><button class="admin-logout-button admin-profile-logout" type="button" data-admin-logout>Logout</button></article>
+      <div class="admin-profile-forms"><form class="admin-panel admin-profile-form" id="edit-profile-form" novalidate><div class="admin-section-heading"><div><span class="admin-eyebrow">Account information</span><h2>Edit Profile</h2></div></div><label for="profile-edit-name">Admin Name</label><input class="admin-search-input" id="profile-edit-name" name="name" type="text" required><label for="profile-edit-email">Admin Email</label><input class="admin-search-input" id="profile-edit-email" name="email" type="email" required><p class="admin-login-error" id="profile-edit-error" role="alert"></p><p class="admin-login-success" id="profile-edit-success" role="status"></p><button class="admin-login-submit" type="submit">Save Changes</button></form><form class="admin-panel admin-profile-form" id="change-password-form" novalidate><div class="admin-section-heading"><div><span class="admin-eyebrow">Security</span><h2>Change Password</h2></div></div><label for="current-password">Current Password</label><input class="admin-search-input" id="current-password" name="currentPassword" type="password" required><label for="new-password">New Password</label><input class="admin-search-input" id="new-password" name="newPassword" type="password" minlength="6" required><label for="confirm-new-password">Confirm New Password</label><input class="admin-search-input" id="confirm-new-password" name="confirmNewPassword" type="password" required><p class="admin-login-error" id="password-error" role="alert"></p><p class="admin-login-success" id="password-success" role="status"></p><button class="admin-login-submit" type="submit">Change Password</button></form></div>
+    </section>
+  </main>
+  <div class="admin-toast" role="status" aria-live="polite"></div>
+  <script src="admin-auth.js?v=admin-auth-4"></script>
+  <script src="translations/admin-en.js?v=admin-language-1"></script><script src="translations/admin-te.js?v=admin-language-1"></script><script src="js/admin-i18n.js?v=admin-language-1"></script>
+  <script src="admin-profile.js?v=admin-profile-1"></script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartProcure | Payments</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="style.css?v=admin-pages-2">
+</head>
+
+<body class="admin-body admin-protected-page">
+
+<main class="admin-main admin-page-main">
+
+    <!-- ================= HEADER ================= -->
+
+    <section class="admin-hero">
+
+        <header class="admin-topbar">
+
+            <a class="admin-hero-brand" href="admin-dashboard.html">
+                <span class="admin-brand-mark">S</span>
+
+                <strong>
+                    Smart<span>Procure</span>
+                </strong>
+            </a>
+
+
+            <div class="admin-top-actions">
+
+                <button
+                        class="admin-profile-button"
+                        type="button"
+                        aria-label="Admin profile"
+                >
+                    <span>AD</span>
+                </button>
+
+
+                <button
+                        class="admin-logout-button"
+                        type="button"
+                        data-admin-logout
+                >
+                    Logout
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <div class="admin-welcome">
+
+            <h1>Payments</h1>
+
+            <p>
+                Review payment records and update payment status.
+            </p>
+
+        </div>
+
+
+        <!-- ================= NAVIGATION ================= -->
+
+        <nav
+                class="admin-hero-nav"
+                aria-label="Admin dashboard navigation"
+        >
+
+            <a href="admin-dashboard.html">
+                Dashboard
+            </a>
+
+            <a href="admin-farmers.html">
+                Farmers
+            </a>
+
+            <a href="admin-bookings.html">
+                Bookings
+            </a>
+
+            <a href="admin-procurement.html">
+                Procurement
+            </a>
+
+            <a
+                    class="active"
+                    href="admin-payments.html"
+            >
+                Payments
+            </a>
+
+            <a href="admin-notifications.html">
+                Notifications
+            </a>
+
+        </nav>
+
+    </section>
+
+
+    <!-- ================= CONTENT ================= -->
+
+    <section class="admin-page-content">
+
+
+        <!-- ================= PAYMENT SUMMARY ================= -->
+
+        <div class="admin-summary-grid">
+
+            <!-- Pending Payments -->
+
+            <article class="admin-summary-card admin-card-yellow">
+
+                <span>◷</span>
+
+                <div>
+
+                    <small>
+                        Pending Payments
+                    </small>
+
+                    <strong id="pending-payment-count">
+                        -
+                    </strong>
+
+                    <p>
+                        Awaiting processing
+                    </p>
+
+                </div>
+
+            </article>
+
+
+            <!-- Completed Payments -->
+
+            <article class="admin-summary-card admin-card-green">
+
+                <span>✓</span>
+
+                <div>
+
+                    <small>
+                        Completed Payments
+                    </small>
+
+                    <strong id="completed-payment-count">
+                        -
+                    </strong>
+
+                    <p>
+                        Payment completed
+                    </p>
+
+                </div>
+
+            </article>
+
+        </div>
+
+
+        <!-- ================= PAYMENT RECORDS ================= -->
+
+        <div class="admin-section-heading">
+
+            <div>
+
+                <span class="admin-eyebrow">
+                    Payment records
+                </span>
+
+                <h2>
+                    Recent Payments
+                </h2>
+
+            </div>
+
+
+            <button
+                    class="admin-outline-button"
+                    type="button"
+                    data-admin-demo
+            >
+                Export Payments
+            </button>
+
+        </div>
+
+
+        <!-- ================= PAYMENT TABLE ================= -->
+
+        <div class="admin-table-wrap">
+
+            <table class="admin-requests-table">
+
+                <thead>
+
+                <tr>
+
+                    <th>
+                        Farmer
+                    </th>
+
+                    <th>
+                        Procurement
+                    </th>
+
+                    <th>
+                        Amount
+                    </th>
+
+                    <th>
+                        Date
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                <tr>
+
+                    <td colspan="6">
+                        Loading payment records...
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ================= TOAST ================= -->
+
+<div
+        class="admin-toast"
+        role="status"
+        aria-live="polite"
+></div>
+
+
+<!-- ================= SCRIPTS ================= -->
+
+<script src="admin-auth.js?v=admin-pages-2"></script>
+
+<script src="admin-payments.js"></script>
+
+
+</body>
+
+</html>

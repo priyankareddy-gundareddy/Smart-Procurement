@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SmartProcure | Procurement Requests</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=admin-pages-1">
+</head>
+
+<body class="admin-body admin-protected-page">
+
+<main class="admin-main admin-page-main">
+
+  <section class="admin-hero">
+
+    <header class="admin-topbar">
+
+      <a class="admin-hero-brand" href="admin-dashboard.html">
+        <span class="admin-brand-mark">S</span>
+        <strong>Smart<span>Procure</span></strong>
+      </a>
+
+      <div class="admin-top-actions">
+
+        <button
+                class="admin-profile-button"
+                type="button"
+                aria-label="Admin profile">
+          <span>AD</span>
+        </button>
+
+        <button
+                class="admin-logout-button"
+                type="button"
+                data-admin-logout>
+          Logout
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <div class="admin-welcome">
+
+      <h1>Procurement Requests</h1>
+
+      <p>
+        Review, update, and track farmer procurement requests.
+      </p>
+
+    </div>
+
+
+    <nav
+            class="admin-hero-nav"
+            aria-label="Admin dashboard navigation">
+
+      <a href="admin-dashboard.html">
+        Dashboard
+      </a>
+
+      <a href="admin-farmers.html">
+        Farmers
+      </a>
+
+      <a href="admin-bookings.html">
+        Bookings
+      </a>
+
+      <a
+              class="active"
+              href="admin-procurement.html">
+        Procurement
+      </a>
+
+      <a href="admin-payments.html">
+        Payments
+      </a>
+
+      <a href="admin-notifications.html">
+        Notifications
+      </a>
+
+    </nav>
+
+  </section>
+
+
+  <section class="admin-page-content">
+
+    <div class="admin-section-heading">
+
+      <div>
+
+          <span class="admin-eyebrow">
+            Operations
+          </span>
+
+        <h2>
+          All Procurement Requests
+        </h2>
+
+      </div>
+
+      <button
+              class="admin-outline-button"
+              type="button"
+              data-admin-demo>
+        Filter Requests
+      </button>
+
+    </div>
+
+
+    <div class="admin-table-wrap">
+
+      <table class="admin-requests-table">
+
+        <thead>
+        <tr>
+          <th>Token</th>
+          <th>Farmer</th>
+          <th>Crop</th>
+          <th>Quantity</th>
+          <th>Centre</th>
+          <th>Slot</th>
+          <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr>
+
+          <td>
+            <strong>Loading...</strong>
+          </td>
+
+          <td>--</td>
+
+          <td>--</td>
+
+          <td>--</td>
+
+          <td>--</td>
+
+          <td>--</td>
+
+          <td>--</td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<div
+        class="admin-toast"
+        role="status"
+        aria-live="polite">
+</div>
+
+
+<!-- Existing admin scripts -->
+
+<script src="admin-auth.js?v=admin-pages-1"></script>
+
+<script src="translations/admin-en.js?v=admin-language-1"></script>
+
+<script src="translations/admin-te.js?v=admin-language-1"></script>
+
+<script src="js/admin-i18n.js?v=admin-language-1"></script>
+
+
+<!-- Backend Officer Queue -->
+
+<script src="admin-requests.js"></script>
+
+</body>
+</html>

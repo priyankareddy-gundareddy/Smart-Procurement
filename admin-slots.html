@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProcure | Slots</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=admin-slots-1">
+</head>
+<body class="admin-body admin-protected-page">
+  <main class="admin-main admin-page-main">
+    <section class="admin-hero">
+      <header class="admin-topbar"><a class="admin-hero-brand" href="admin-dashboard.html"><span class="admin-brand-mark">S</span><strong>Smart<span>Procure</span></strong></a><div class="admin-top-actions"><button class="admin-profile-button" type="button" aria-label="Admin profile"><span>AD</span></button><button class="admin-logout-button" type="button" data-admin-logout>Logout</button></div></header>
+      <div class="admin-welcome"><h1>Slots</h1><p>Manage procurement appointment availability.</p></div>
+      <nav class="admin-hero-nav" aria-label="Admin dashboard navigation"><a href="admin-dashboard.html">Dashboard</a><a href="admin-farmers.html">Farmers</a><a href="admin-bookings.html">Bookings</a><a href="admin-procurement.html">Procurement</a><a class="active" href="admin-slots.html">📅 Slots</a><a href="admin-payments.html">Payments</a><a href="admin-notifications.html">Notifications</a></nav>
+    </section>
+    <section class="admin-page-content">
+      <div class="admin-section-heading"><div><span class="admin-eyebrow">Slot management</span><h2>Procurement Slots</h2></div><button class="admin-login-submit admin-slot-add-button" type="button" id="add-slot">Add Slot <span>+</span></button></div>
+      <div class="admin-section-heading admin-slot-filters"><div></div><div class="admin-page-actions"><input class="admin-search-input" id="slot-date-filter" type="date" aria-label="Filter slots by date"><select class="admin-search-input" id="slot-status-filter" aria-label="Filter slots by status"><option value="all">All statuses</option><option>Available</option><option>Full</option><option>Completed</option><option>Inactive</option></select></div></div>
+      <div class="admin-table-wrap"><table class="admin-requests-table" id="slots-table"><thead><tr><th>Date</th><th>Start Time</th><th>End Time</th><th>Maximum Capacity</th><th>Booked Count</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+    </section>
+  </main>
+  <dialog class="admin-details-dialog" id="slot-dialog"><form method="dialog" id="slot-form"><div class="admin-details-dialog-heading"><div><span class="admin-eyebrow">Slot management</span><h2 id="slot-dialog-title">Add Slot</h2></div><button class="admin-dialog-close" type="submit" aria-label="Close slot form">×</button></div><input type="hidden" id="slot-id"><label class="slot-form-label" for="slot-date">Date</label><input class="admin-search-input slot-form-input" id="slot-date" type="date" required><label class="slot-form-label" for="slot-start">Start Time</label><input class="admin-search-input slot-form-input" id="slot-start" type="time" required><label class="slot-form-label" for="slot-end">End Time</label><input class="admin-search-input slot-form-input" id="slot-end" type="time" required><label class="slot-form-label" for="slot-capacity">Maximum Capacity</label><input class="admin-search-input slot-form-input" id="slot-capacity" type="number" min="1" required><div class="admin-page-actions slot-form-actions"><button class="admin-outline-button" type="submit">Cancel</button><button class="admin-login-submit" type="button" id="save-slot">Save Slot</button></div></form></dialog>
+  <div class="admin-toast" role="status" aria-live="polite"></div>
+  <script src="admin-auth.js?v=admin-slots-1"></script>
+  <script src="translations/admin-en.js?v=admin-language-1"></script><script src="translations/admin-te.js?v=admin-language-1"></script><script src="js/admin-i18n.js?v=admin-language-1"></script>
+  <script src="admin-slots.js?v=admin-slots-1"></script>
+</body>
+</html>

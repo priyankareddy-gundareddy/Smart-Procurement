@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProcure | Procurement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=admin-procurement-3">
+</head>
+<body class="admin-body admin-protected-page">
+  <main class="admin-main admin-page-main">
+    <section class="admin-hero">
+      <header class="admin-topbar"><a class="admin-hero-brand" href="admin-dashboard.html"><span class="admin-brand-mark">S</span><strong>Smart<span>Procure</span></strong></a><div class="admin-top-actions"><button class="admin-profile-button" type="button" aria-label="Admin profile"><span>AD</span></button><button class="admin-logout-button" type="button" data-admin-logout>Logout</button></div></header>
+      <div class="admin-welcome"><h1>Procurement</h1><p>Review farmer requests and manage procurement progress.</p></div>
+      <nav class="admin-hero-nav" aria-label="Admin dashboard navigation"><a href="admin-dashboard.html">Dashboard</a><a href="admin-farmers.html">Farmers</a><a href="admin-bookings.html">Bookings</a><a class="active" href="admin-procurement.html">Procurement</a><a href="admin-slots.html">📅 Slots</a><a href="admin-payments.html">Payments</a><a href="admin-notifications.html">Notifications</a></nav>
+    </section>
+    <section class="admin-page-content">
+      <div class="admin-section-heading"><div><span class="admin-eyebrow">Procurement management</span><h2>Farmer Requests</h2></div><div class="admin-page-actions procurement-filters"><input class="admin-search-input" id="procurement-search" type="search" placeholder="Search farmer or crop" aria-label="Search by farmer or crop"><input class="admin-search-input" id="procurement-date" type="date" aria-label="Filter by date"><select class="admin-search-input" id="procurement-status" aria-label="Filter by procurement status"><option value="all">All statuses</option><option>Pending</option><option>Approved</option><option>Processing</option><option>Completed</option><option>Rejected</option></select></div></div>
+      <div class="admin-table-wrap"><table class="admin-requests-table" id="procurement-table"><thead><tr><th>Request ID</th><th>Farmer Name</th><th>Crop / Product</th><th>Quantity</th><th>Requested Price</th><th>Request Date</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+      <div class="admin-section-heading procurement-completed-heading"><div><span class="admin-eyebrow">Completed transactions</span><h2>Completed Procurements</h2></div></div>
+      <div class="admin-table-wrap"><table class="admin-requests-table" id="completed-procurement-table"><thead><tr><th>Farmer Name</th><th>Crop / Product</th><th>Quantity</th><th>Final Price</th><th>Completed Date</th><th>Details</th></tr></thead><tbody><tr><td><strong>Sita Devi</strong></td><td>Wheat</td><td>300 kg</td><td>₹18,200</td><td>10 Sep 2026</td><td><button class="admin-table-action procurement-details" type="button" data-name="Sita Devi">View Details</button></td></tr><tr><td><strong>Manoj Patel</strong></td><td>Rice</td><td>450 kg</td><td>₹22,100</td><td>08 Sep 2026</td><td><button class="admin-table-action procurement-details" type="button" data-name="Manoj Patel">View Details</button></td></tr></tbody></table></div>
+    </section>
+  </main>
+  <div class="admin-toast" role="status" aria-live="polite"></div>
+  <dialog class="admin-details-dialog" id="procurement-details-dialog"><div class="admin-details-dialog-heading"><div><span class="admin-eyebrow">Procurement request</span><h2>Request Details</h2></div><button class="admin-dialog-close" type="button" aria-label="Close details">×</button></div><dl class="admin-details-list" id="procurement-details-list"></dl></dialog>
+  <script src="admin-auth.js?v=admin-procurement-3"></script>
+  <script src="translations/admin-en.js?v=admin-language-1"></script><script src="translations/admin-te.js?v=admin-language-1"></script><script src="js/admin-i18n.js?v=admin-language-1"></script>
+  <script src="admin-procurement.js?v=admin-procurement-1"></script>
+</body>
+</html>

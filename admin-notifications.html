@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProcure | Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=admin-notifications-2">
+</head>
+<body class="admin-body admin-protected-page">
+  <main class="admin-main admin-page-main">
+    <section class="admin-hero">
+      <header class="admin-topbar"><a class="admin-hero-brand" href="admin-dashboard.html"><span class="admin-brand-mark">S</span><strong>Smart<span>Procure</span></strong></a><div class="admin-top-actions"><button class="admin-profile-button" type="button" aria-label="Admin profile"><span>AD</span></button><button class="admin-logout-button" type="button" data-admin-logout>Logout</button></div></header>
+      <div class="admin-welcome"><h1>Notifications</h1><p>Review important SmartProcure alerts and updates.</p></div>
+      <nav class="admin-hero-nav" aria-label="Admin dashboard navigation"><a href="admin-dashboard.html">Dashboard</a><a href="admin-farmers.html">Farmers</a><a href="admin-bookings.html">Bookings</a><a href="admin-procurement.html">Procurement</a><a href="admin-payments.html">Payments</a><a class="active notification-nav-link" href="admin-notifications.html">Notifications <span class="notification-badge" id="notification-nav-badge">3</span></a></nav>
+    </section>
+    <section class="admin-page-content">
+      <div class="admin-section-heading"><div><span class="admin-eyebrow">System alerts</span><h2>Notifications</h2><p class="notification-count" id="notification-count"></p></div><button class="admin-outline-button" type="button" id="mark-all-read">Mark All Read</button></div>
+      <div class="notification-board" id="notification-board" aria-live="polite"></div>
+    </section>
+  </main>
+  <div class="admin-toast" role="status" aria-live="polite"></div>
+  <script src="admin-auth.js?v=admin-notifications-2"></script>
+  <script src="admin-notification-badge.js?v=admin-notifications-1"></script>
+  <script src="translations/admin-en.js?v=admin-language-1"></script><script src="translations/admin-te.js?v=admin-language-1"></script><script src="js/admin-i18n.js?v=admin-language-1"></script>
+  <script src="admin-notifications.js?v=admin-notifications-1"></script>
+</body>
+</html>

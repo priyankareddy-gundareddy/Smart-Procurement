@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>window.location.replace('admin-dashboard.html');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SmartProcure Admin Dashboard">
+  <title>SmartProcure | Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=admin-dashboard-1">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <a class="admin-brand" href="admin.html" aria-label="SmartProcure admin home">
+        <span class="admin-brand-mark">S</span>
+        <span>Smart<span>Procure</span><small>Admin Console</small></span>
+      </a>
+      <div class="admin-user">
+        <span class="admin-user-avatar">A</span>
+        <div><strong>Admin</strong><small>System manager</small></div>
+      </div>
+      <nav class="admin-nav" aria-label="Admin navigation">
+        <a class="active" href="#dashboard">⌂ <span>Dashboard</span></a>
+        <a href="#farmers">♙ <span>Farmers</span></a>
+        <a href="#requests">▤ <span>Procurement Requests</span></a>
+        <a href="#centers">⌖ <span>Centers</span></a>
+        <a href="#slots">◷ <span>Slots</span></a>
+        <a href="#analytics">▥ <span>Analytics</span></a>
+        <a href="#notifications">♧ <span>Notifications</span></a>
+        <a href="#profile">⚙ <span>Profile</span></a>
+      </nav>
+      <button class="admin-sidebar-logout" type="button" data-admin-action="logout">↪ <span>Logout</span></button>
+    </aside>
+
+    <main class="admin-main" id="dashboard">
+      <header class="admin-topbar">
+        <button class="admin-menu-toggle" type="button" aria-label="Open admin navigation" aria-expanded="false">☰</button>
+        <div>
+          <span class="admin-eyebrow">SmartProcure control center</span>
+          <h1>Admin Dashboard</h1>
+        </div>
+        <div class="admin-top-actions">
+          <button class="admin-notification-button" type="button" aria-label="View notifications">♧<i>3</i></button>
+          <button class="admin-profile-button" type="button" data-admin-action="profile"><span>AD</span> Admin</button>
+          <button class="admin-logout-button" type="button" data-admin-action="logout">Logout</button>
+        </div>
+      </header>
+
+      <section class="admin-welcome" aria-labelledby="admin-welcome-title">
+        <div>
+          <span class="admin-eyebrow">Overview</span>
+          <h2 id="admin-welcome-title">Welcome, <em>Admin</em> 👋</h2>
+          <p>Monitor and manage the SmartProcure procurement system.</p>
+        </div>
+        <span class="admin-date">MONDAY, 14 OCTOBER 2024</span>
+      </section>
+
+      <section class="admin-summary-grid" aria-label="System summary">
+        <article class="admin-summary-card admin-card-green"><span>♙</span><div><small>Total Farmers</small><strong>1,250</strong><p>Registered accounts</p></div></article>
+        <article class="admin-summary-card admin-card-yellow"><span>◷</span><div><small>Pending Requests</small><strong>84</strong><p>Need attention</p></div></article>
+        <article class="admin-summary-card admin-card-blue"><span>▣</span><div><small>Today's Bookings</small><strong>126</strong><p>Scheduled visits</p></div></article>
+        <article class="admin-summary-card admin-card-coral"><span>✓</span><div><small>Completed Procurement</small><strong>542</strong><p>This month</p></div></article>
+      </section>
+
+      <section class="admin-section" id="requests" aria-labelledby="requests-title">
+        <div class="admin-section-heading"><div><span class="admin-eyebrow">Operations</span><h2 id="requests-title">Procurement Requests</h2></div><button class="admin-outline-button" type="button" data-admin-action="view-requests">View All Requests <span>→</span></button></div>
+        <div class="admin-table-wrap">
+          <table class="admin-requests-table">
+            <thead><tr><th>Farmer</th><th>Crop</th><th>Quantity</th><th>Center</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Ravi Kumar</strong><small>Farmer ID · 48291</small></td><td>Rice</td><td>500 kg</td><td>Vijayawada Center</td><td>10 Sep 2026</td><td><span class="admin-status pending">Pending</span></td><td><button class="admin-table-action" type="button" data-request="Ravi Kumar">View</button></td></tr>
+              <tr><td><strong>Sita Devi</strong><small>Farmer ID · 48288</small></td><td>Wheat</td><td>300 kg</td><td>Center B</td><td>10 Sep 2026</td><td><span class="admin-status completed">Completed</span></td><td><button class="admin-table-action" type="button" data-request="Sita Devi">View</button></td></tr>
+              <tr><td><strong>Ramesh Rao</strong><small>Farmer ID · 48274</small></td><td>Rice</td><td>700 kg</td><td>Center A</td><td>11 Sep 2026</td><td><span class="admin-status confirmed">Confirmed</span></td><td><button class="admin-table-action" type="button" data-request="Ramesh Rao">Update</button></td></tr>
+              <tr><td><strong>Anita Singh</strong><small>Farmer ID · 48263</small></td><td>Maize</td><td>400 kg</td><td>Center C</td><td>11 Sep 2026</td><td><span class="admin-status pending">Pending</span></td><td><button class="admin-table-action" type="button" data-request="Anita Singh">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="admin-management-grid" id="centers" aria-label="Quick management">
+        <article><span>♙</span><h3>Manage Farmers</h3><p>Review farmer accounts and registration activity.</p><button type="button" data-admin-action="manage-farmers">View Farmers <b>→</b></button></article>
+        <article><span>⌖</span><h3>Manage Centers</h3><p>Update locations, operating hours, and availability.</p><button type="button" data-admin-action="manage-centers">Manage Centers <b>→</b></button></article>
+        <article id="slots"><span>◷</span><h3>Manage Slots</h3><p>Control daily capacity and appointment schedules.</p><button type="button" data-admin-action="manage-slots">Manage Slots <b>→</b></button></article>
+        <article><span>✓</span><h3>Update Status</h3><p>Keep procurement progress accurate for farmers.</p><button type="button" data-admin-action="update-status">Update Status <b>→</b></button></article>
+      </section>
+
+      <section class="admin-lower-grid" id="analytics">
+        <article class="admin-panel">
+          <div class="admin-section-heading"><div><span class="admin-eyebrow">System pulse</span><h2>Analytics Preview</h2></div><button class="admin-icon-button" type="button" aria-label="More analytics">•••</button></div>
+          <div class="admin-chart-row"><span>Rice</span><div><i style="width:82%"></i></div><strong>82%</strong></div>
+          <div class="admin-chart-row"><span>Wheat</span><div><i style="width:58%"></i></div><strong>58%</strong></div>
+          <div class="admin-chart-row"><span>Maize</span><div><i style="width:41%"></i></div><strong>41%</strong></div>
+          <div class="admin-chart-summary"><span><b>126</b><small>Daily bookings</small></span><span><b>86%</b><small>Completed</small></span><span><b>14%</b><small>Pending</small></span></div>
+        </article>
+        <article class="admin-panel" id="notifications">
+          <div class="admin-section-heading"><div><span class="admin-eyebrow">Live feed</span><h2>Recent Activity</h2></div><span class="admin-live-dot">Live</span></div>
+          <ul class="admin-activity-list"><li><span>♙</span><div><strong>New farmer registration</strong><small>Rajesh Kumar joined · 8 min ago</small></div></li><li><span>▤</span><div><strong>New procurement request</strong><small>Ravi Kumar submitted a Rice request</small></div></li><li><span>✓</span><div><strong>Slot confirmed</strong><small>Center B · Token SP-1024</small></div></li><li><span>⌖</span><div><strong>Center availability updated</strong><small>Vijayawada · 15 slots available</small></div></li></ul>
+        </article>
+      </section>
+    </main>
+  </div>
+  <div class="admin-toast" role="status" aria-live="polite"></div>
+  <script src="admin.js?v=admin-dashboard-1"></script>
+  <script src="translations/admin-en.js?v=admin-language-1"></script><script src="translations/admin-te.js?v=admin-language-1"></script><script src="js/admin-i18n.js?v=admin-language-3"></script>
+</body>
+</html>
